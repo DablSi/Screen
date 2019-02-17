@@ -36,6 +36,7 @@ public class VideoAssetActivity extends Activity implements TextureView.SurfaceT
     // MediaPlayer instance to control playback of video file.
     public static MediaPlayer mMediaPlayer;
     private TextureView mTextureView;
+    public static Uri uri;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -74,13 +75,13 @@ public class VideoAssetActivity extends Activity implements TextureView.SurfaceT
 
     private void initView() {
         hideSystemUI();
-        mTextureView = (TextureView) findViewById(R.id.textureView);
+        mTextureView = findViewById(R.id.textureView);
         // SurfaceTexture is available only after the TextureView
         // is attached to a window and onAttachedToWindow() has been invoked.
         // We need to use SurfaceTextureListener to be notified when the SurfaceTexture
         // becomes available.
         mTextureView.setSurfaceTextureListener(this);
-        FrameLayout rootView = (FrameLayout) findViewById(R.id.rootView);
+        FrameLayout rootView = findViewById(R.id.rootView);
         Point size = new Point();
         getWindowManager().getDefaultDisplay().getSize(size);
         mDisplayWidth = size.x;
@@ -165,9 +166,8 @@ public class VideoAssetActivity extends Activity implements TextureView.SurfaceT
         Surface surface = new Surface(surfaceTexture);
 
         try {
-            AssetFileDescriptor afd = getAssets().openFd(FILE_NAME);
             mMediaPlayer = new MediaPlayer();
-            mMediaPlayer.setDataSource(afd.getFileDescriptor(), afd.getStartOffset(), afd.getLength());
+            mMediaPlayer.setDataSource(uri.getPath());
             mMediaPlayer.setSurface(surface);
             mMediaPlayer.setLooping(true);
 
