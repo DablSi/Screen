@@ -1,9 +1,11 @@
 package com.example.ducks.screen;
 
+import android.Manifest;
 import android.app.Activity;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.content.res.AssetFileDescriptor;
 import android.content.res.Configuration;
 import android.content.res.Resources;
@@ -12,6 +14,7 @@ import android.media.MediaMetadataRetriever;
 import android.media.MediaPlayer;
 import android.net.Uri;
 import android.os.Bundle;
+import android.support.v4.app.ActivityCompat;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.MotionEvent;
@@ -20,8 +23,14 @@ import android.view.TextureView;
 import android.view.View;
 import android.widget.Button;
 import android.widget.FrameLayout;
+import android.widget.Toast;
 
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
+
+import static android.content.pm.PackageManager.*;
+import static java.security.AccessController.getContext;
 
 public class VideoAssetActivity extends Activity implements TextureView.SurfaceTextureListener {
     // Log tag
@@ -36,7 +45,7 @@ public class VideoAssetActivity extends Activity implements TextureView.SurfaceT
     // MediaPlayer instance to control playback of video file.
     public static MediaPlayer mMediaPlayer;
     private TextureView mTextureView;
-    public static Uri uri;
+    public static String path;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -94,8 +103,13 @@ public class VideoAssetActivity extends Activity implements TextureView.SurfaceT
             public boolean onTouch(View view, MotionEvent motionEvent) {
                 switch (motionEvent.getAction()) {
                     case MotionEvent.ACTION_UP:
-                        if (mMediaPlayer.isPlaying()) {showSystemUI();mMediaPlayer.pause();}
-                        else {hideSystemUI();mMediaPlayer.start();}
+                        if (mMediaPlayer.isPlaying()) {
+                            showSystemUI();
+                            mMediaPlayer.pause();
+                        } else {
+                            hideSystemUI();
+                            mMediaPlayer.start();
+                        }
                 }
                 return true;
             }
@@ -154,7 +168,7 @@ public class VideoAssetActivity extends Activity implements TextureView.SurfaceT
 
         } else {
             matrix.setScale(scaleRegion, scaleRegion / scaleX);
-            matrix.postTranslate(-ax*scaleRegion / scaleX , -ay*scaleRegion / scaleX  );
+            matrix.postTranslate(-ax * scaleRegion / scaleX, -ay * scaleRegion / scaleX);
         }
         mTextureView.setTransform(matrix);
         mTextureView.setLayoutParams(new FrameLayout.LayoutParams((int) mDisplayWidth, (int) mDisplayHeight));
@@ -166,23 +180,63 @@ public class VideoAssetActivity extends Activity implements TextureView.SurfaceT
         Surface surface = new Surface(surfaceTexture);
 
         try {
+            if(PERMISSION_GRANTED!= ActivityCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE)){
+                ActivityCompat.requestPermissions( this,
+                        new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE,Manifest.permission.READ_EXTERNAL_STORAGE},
+                        1);
+            }
+
             mMediaPlayer = new MediaPlayer();
-            mMediaPlayer.setDataSource(uri.getPath());
+            FileInputStream fileInputStream = null;
+            try {
+                fileInputStream = new FileInputStream(path);
+                mMediaPlayer.setDataSource(fileInputStream.getFD());
+                fileInputStream.close();
+                mMediaPlayer.prepare();
+            } catch (FileNotFoundException e) {
+                e.printStackTrace();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
             mMediaPlayer.setSurface(surface);
             mMediaPlayer.setLooping(true);
 
             // don't forget to call MediaPlayer.prepareAsync() method when you use constructor for
             // creating MediaPlayer
             mMediaPlayer.prepareAsync();
+            mMediaPlayer.setOnPreparedListener(new MediaPlayer.OnPreparedListener() {
+                @Override
+                public void onPrepared(MediaPlayer mediaPlayer) {
+                    mediaPlayer.start();
+                }
+            });
 
         } catch (IllegalArgumentException e) {
             Log.d(TAG, e.getMessage());
         } catch (SecurityException e) {
             Log.d(TAG, e.getMessage());
         } catch (IllegalStateException e) {
-            Log.d(TAG, e.getMessage());
-        } catch (IOException e) {
-            Log.d(TAG, e.getMessage());
+            e.printStackTrace();
+        }
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode,String permissions[], int[] grantResults) {
+        switch (requestCode) {
+            case 1: {
+                if (grantResults.length == 2 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                    Toast.makeText(this,
+                            "permission_storage_success",
+                            Toast.LENGTH_SHORT).show();
+
+                } else {
+                    Toast.makeText(this,
+                            "permission_storage_failure",
+                            Toast.LENGTH_SHORT).show();
+                    super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+                }
+                return;
+            }
         }
     }
 

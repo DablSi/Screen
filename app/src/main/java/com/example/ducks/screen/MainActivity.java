@@ -1,9 +1,12 @@
 package com.example.ducks.screen;
 
 import android.content.Intent;
+import android.database.Cursor;
 import android.net.Uri;
 import android.os.Build;
 import android.os.CountDownTimer;
+import android.os.Environment;
+import android.provider.MediaStore;
 import android.support.annotation.RequiresApi;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -26,37 +29,46 @@ public class MainActivity extends AppCompatActivity {
     int i = 1;
     EditText et1, et2, et3, et4;
     Timer timer;
-    private static final int FILE_SELECT_CODE = 0;
+    private static final int REQUEST_TAKE_GALLERY_VIDEO = 0;
 
     private void showFileChooser() {
-        Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
-        intent.setType("*/*");
-        intent.addCategory(Intent.CATEGORY_OPENABLE);
+        Intent intent = new Intent();
+        intent.setType("video/*");
+        intent.setAction(Intent.ACTION_GET_CONTENT);
+        startActivityForResult(Intent.createChooser(intent, "Select Video"), REQUEST_TAKE_GALLERY_VIDEO);
+    }
 
-        try {
-            startActivityForResult(
-                    Intent.createChooser(intent, "Select a File to Upload"),
-                    FILE_SELECT_CODE);
-        } catch (android.content.ActivityNotFoundException ex) {
-            // Potentially direct the user to the Market with a Dialog
-            Toast.makeText(this, "Please install a File Manager.",
-                    Toast.LENGTH_SHORT).show();
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        if (resultCode == RESULT_OK) {
+            if (requestCode == REQUEST_TAKE_GALLERY_VIDEO) {
+                Uri selectedImageUri = data.getData();
+
+                // OI FILE Manager
+                String filemanagerstring = selectedImageUri.getPath();
+
+                // MEDIA GALLERY
+                String selectedImagePath = getPath(selectedImageUri);
+                if (selectedImagePath != null) {
+                    Log.e("FILE", selectedImagePath);
+                    VideoAssetActivity.path = selectedImagePath;
+                }
+            }
         }
     }
 
-    @Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        switch (requestCode) {
-            case FILE_SELECT_CODE:
-                if (resultCode == RESULT_OK) {
-                    // Get the Uri of the selected file
-                    Uri uri = data.getData();
-                    Log.d("FILE", "File path: " + uri.getPath());
-                    VideoAssetActivity.uri = uri;
-                }
-                break;
-        }
-        super.onActivityResult(requestCode, resultCode, data);
+    // UPDATED!
+    public String getPath(Uri uri) {
+        String[] projection = {MediaStore.Video.Media.DATA};
+        Cursor cursor = getContentResolver().query(uri, projection, null, null, null);
+        if (cursor != null) {
+            // HERE YOU WILL GET A NULLPOINTER IF CURSOR IS NULL
+            // THIS CAN BE, IF YOU USED OI FILE MANAGER FOR PICKING THE MEDIA
+            int column_index = cursor
+                    .getColumnIndexOrThrow(MediaStore.Video.Media.DATA);
+            cursor.moveToFirst();
+            return cursor.getString(column_index);
+        } else
+            return null;
     }
 
     @Override
@@ -86,13 +98,12 @@ public class MainActivity extends AppCompatActivity {
                     Date date = new Date();
                     Date runIn = new SimpleDateFormat("dd.MM.yyyy-HH:mm").parse(formatter.format(date) + i + ":" + i1);
                     long dif = runIn.getTime() - (System.currentTimeMillis() + Sync.deltaT);
-                    if(dif <= 0){
-                        Toast.makeText(getApplicationContext(), "Время меньше серверного!", Toast.LENGTH_SHORT).show();
-                    }
-                    else {
+                    if (dif <= 0) {
+                        Toast.makeText(getApplicationContext(), "Время меньше серверного!", Toast.LENGTH_LONG).show();
+                    } else {
                         MyTimer myTimer = new MyTimer();
                         timer = new Timer();
-                        Toast.makeText(getApplicationContext(), "Видео запустится через " + dif + " миллисекунд" , Toast.LENGTH_SHORT).show();
+                        Toast.makeText(getApplicationContext(), "Видео запустится через " + dif + " миллисекунд", Toast.LENGTH_LONG).show();
                         timer.schedule(myTimer, dif);
                     }
                 } catch (ParseException e) {
