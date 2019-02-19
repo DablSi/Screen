@@ -1,3 +1,8 @@
 <resources>
     <string name="app_name">Screen</string>
+    <string name="ready">Готово</string>
+    <string name="serv_time">Серверное время: </string>
+    <string name="time_less">Время меньше серверного!</string>
+    <string name="time_more">Видео запустится через </string>
+    <string name="mls"> миллисекунд</string>
 </resources>

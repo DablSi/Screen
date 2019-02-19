@@ -1,22 +1,20 @@
 package com.example.ducks.screen;
 
 import android.content.Intent;
+import android.content.pm.ActivityInfo;
 import android.database.Cursor;
 import android.net.Uri;
-import android.os.Build;
 import android.os.CountDownTimer;
-import android.os.Environment;
 import android.provider.MediaStore;
-import android.support.annotation.RequiresApi;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.widget.*;
 
-import java.io.File;
 import java.text.*;
 import java.util.Date;
+import java.util.Locale;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -25,10 +23,11 @@ public class MainActivity extends AppCompatActivity {
     public RelativeLayout relativeLayout;
     TimePicker timePicker;
     TextView textView;
-    boolean isPressed = false;
+    static boolean isStarted = false;
+    private boolean isPressed = false;
     int i = 1;
-    EditText et1, et2, et3, et4;
-    Timer timer;
+    private EditText et1, et2, et3, et4;
+    private Timer timer;
     private static final int REQUEST_TAKE_GALLERY_VIDEO = 0;
 
     private void showFileChooser() {
@@ -57,16 +56,16 @@ public class MainActivity extends AppCompatActivity {
     }
 
     // UPDATED!
-    public String getPath(Uri uri) {
+    private String getPath(Uri uri) {
         String[] projection = {MediaStore.Video.Media.DATA};
         Cursor cursor = getContentResolver().query(uri, projection, null, null, null);
         if (cursor != null) {
-            // HERE YOU WILL GET A NULLPOINTER IF CURSOR IS NULL
-            // THIS CAN BE, IF YOU USED OI FILE MANAGER FOR PICKING THE MEDIA
             int column_index = cursor
                     .getColumnIndexOrThrow(MediaStore.Video.Media.DATA);
             cursor.moveToFirst();
-            return cursor.getString(column_index);
+            String index = cursor.getString(column_index);
+            cursor.close();
+            return index;
         } else
             return null;
     }
@@ -75,6 +74,7 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
         startService(new Intent(MainActivity.this, Sync.class));
         showFileChooser();
         et1 = findViewById(R.id.edit1);
@@ -90,20 +90,19 @@ public class MainActivity extends AppCompatActivity {
         timePicker.setIs24HourView(true);
 
         timePicker.setOnTimeChangedListener(new TimePicker.OnTimeChangedListener() {
-            @RequiresApi(api = Build.VERSION_CODES.M)
             @Override
             public void onTimeChanged(TimePicker timePicker, int i, int i1) {
                 try {
-                    SimpleDateFormat formatter = new SimpleDateFormat("dd.MM.yyyy-");
+                    SimpleDateFormat formatter = new SimpleDateFormat("dd.MM.yyyy-", Locale.getDefault());
                     Date date = new Date();
-                    Date runIn = new SimpleDateFormat("dd.MM.yyyy-HH:mm").parse(formatter.format(date) + i + ":" + i1);
+                    Date runIn = new SimpleDateFormat("dd.MM.yyyy-HH:mm", Locale.getDefault()).parse(formatter.format(date) + i + ":" + i1);
                     long dif = runIn.getTime() - (System.currentTimeMillis() + Sync.deltaT);
                     if (dif <= 0) {
-                        Toast.makeText(getApplicationContext(), "Время меньше серверного!", Toast.LENGTH_LONG).show();
+                        Toast.makeText(getApplicationContext(), getString(R.string.time_less), Toast.LENGTH_SHORT).show();
                     } else {
                         MyTimer myTimer = new MyTimer();
                         timer = new Timer();
-                        Toast.makeText(getApplicationContext(), "Видео запустится через " + dif + " миллисекунд", Toast.LENGTH_LONG).show();
+                        Toast.makeText(getApplicationContext(), getString(R.string.time_more) + dif + getString(R.string.mls), Toast.LENGTH_SHORT).show();
                         timer.schedule(myTimer, dif);
                     }
                 } catch (ParseException e) {
@@ -134,7 +133,7 @@ public class MainActivity extends AppCompatActivity {
 
         @Override
         public void onTick(long l) {
-            textView.setText("Server time: " + new Date(Sync.deltaT + System.currentTimeMillis()).toString());
+            textView.setText(getString(R.string.serv_time) + new Date(Sync.deltaT + System.currentTimeMillis()).toString());
         }
 
         @Override
@@ -147,6 +146,7 @@ public class MainActivity extends AppCompatActivity {
         @Override
         public void run() {
             if (isPressed) {
+                isStarted = true;
                 VideoAssetActivity.mMediaPlayer.start();
             }
         }

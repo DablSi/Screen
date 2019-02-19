@@ -48,6 +48,7 @@
 
     <Button android:layout_width="wrap_content" android:layout_height="wrap_content"
             android:id="@+id/ready"
-            android:text="Ready" android:layout_centerHorizontal="true" android:layout_below="@+id/lin"/>
+            android:text="@string/ready"
+            android:layout_centerHorizontal="true" android:layout_below="@+id/lin"/>
 
 </RelativeLayout>

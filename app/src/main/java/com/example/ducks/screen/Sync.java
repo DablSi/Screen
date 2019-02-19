@@ -11,18 +11,14 @@ import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.net.Socket;
-import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.Timer;
-import java.util.TimerTask;
 
 import static android.content.ContentValues.TAG;
 
 public class Sync extends Service {
-    public int D = 0;
-    public static int deltaT = 0;
+    int D = 0;
+    static int deltaT = 0;
     public static String date;
-    public static long t1, t2, t3;
+    static long t1, t2, t3;
 
     private SyncThread syncThread;
 
@@ -32,13 +28,13 @@ public class Sync extends Service {
     @Override
     public void onCreate() {
         // сообщение о создании службы
-        Toast.makeText(this, "Service created", Toast.LENGTH_SHORT).show();
+//        Toast.makeText(this, "Service created", Toast.LENGTH_SHORT).show();
     }
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
         // сообщение о запуске службы
-        Toast.makeText(this, "Service started", Toast.LENGTH_SHORT).show();
+//        Toast.makeText(this, "Service started", Toast.LENGTH_SHORT).show();
 
         // создаем объект нашего AsyncTask (необходимо для работы с сетью)
         syncThread = new SyncThread();
