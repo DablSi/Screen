@@ -1,8 +1,11 @@
 <resources>
     <string name="app_name">Screen</string>
     <string name="ready">Готово</string>
-    <string name="serv_time">Серверное время: </string>
+    <string name="serv_time">Серверное время:</string>
     <string name="time_less">Время меньше серверного!</string>
-    <string name="time_more">Видео запустится через </string>
-    <string name="mls"> миллисекунд</string>
+    <string name="time_more">Видео запустится через</string>
+    <string name="mls">миллисекунд</string>
+
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
 </resources>

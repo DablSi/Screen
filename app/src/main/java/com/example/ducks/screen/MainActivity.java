@@ -75,8 +75,8 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
-        startService(new Intent(MainActivity.this, Sync.class));
         showFileChooser();
+        startService(new Intent(MainActivity.this, Sync.class));
         et1 = findViewById(R.id.edit1);
         et2 = findViewById(R.id.edit2);
         et3 = findViewById(R.id.edit3);
@@ -102,7 +102,7 @@ public class MainActivity extends AppCompatActivity {
                     } else {
                         MyTimer myTimer = new MyTimer();
                         timer = new Timer();
-                        Toast.makeText(getApplicationContext(), getString(R.string.time_more) + dif + getString(R.string.mls), Toast.LENGTH_SHORT).show();
+                        Toast.makeText(getApplicationContext(), getString(R.string.time_more) + " " + dif + " " + getString(R.string.mls), Toast.LENGTH_SHORT).show();
                         timer.schedule(myTimer, dif);
                     }
                 } catch (ParseException e) {
@@ -114,10 +114,15 @@ public class MainActivity extends AppCompatActivity {
         button.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                VideoAssetActivity.ax = Integer.parseInt(et1.getText().toString());
-                VideoAssetActivity.ay = Integer.parseInt(et2.getText().toString());
-                VideoAssetActivity.bx = Integer.parseInt(et3.getText().toString());
-                VideoAssetActivity.by = Integer.parseInt(et4.getText().toString());
+                if (!(et1.getText().toString().equals("") ||
+                        et2.getText().toString().equals("") ||
+                        et3.getText().toString().equals("") ||
+                        et4.getText().toString().equals(""))) {
+                    VideoAssetActivity.ax = Integer.parseInt(et1.getText().toString());
+                    VideoAssetActivity.ay = Integer.parseInt(et2.getText().toString());
+                    VideoAssetActivity.bx = Integer.parseInt(et3.getText().toString());
+                    VideoAssetActivity.by = Integer.parseInt(et4.getText().toString());
+                }
                 isPressed = true;
                 Intent intent1 = new Intent(MainActivity.this, VideoAssetActivity.class);
                 startActivity(intent1);

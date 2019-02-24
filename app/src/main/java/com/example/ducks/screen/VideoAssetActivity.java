@@ -20,6 +20,7 @@ import android.view.View;
 import android.widget.FrameLayout;
 import android.widget.Toast;
 
+import java.io.FileDescriptor;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -30,7 +31,6 @@ public class VideoAssetActivity extends Activity implements TextureView.SurfaceT
     // Log tag
     private static final String TAG = VideoAssetActivity.class.getName();
     // Asset video file name
-    private static final String FILE_NAME = "video.mp4";
     private float mVideoWidth;
     private float mVideoHeight;
     private float mDisplayWidth;
@@ -40,6 +40,7 @@ public class VideoAssetActivity extends Activity implements TextureView.SurfaceT
     static MediaPlayer mMediaPlayer;
     private TextureView mTextureView;
     static String path;
+
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -128,10 +129,9 @@ public class VideoAssetActivity extends Activity implements TextureView.SurfaceT
 
     private void calculateVideoSize() {
         try {
-            AssetFileDescriptor afd = getAssets().openFd(FILE_NAME);
+            FileDescriptor fd = new FileInputStream(path).getFD();
             MediaMetadataRetriever metaRetriever = new MediaMetadataRetriever();
-            metaRetriever.setDataSource(
-                    afd.getFileDescriptor(), afd.getStartOffset(), afd.getLength());
+            metaRetriever.setDataSource(fd);
             String height = metaRetriever
                     .extractMetadata(MediaMetadataRetriever.METADATA_KEY_VIDEO_HEIGHT);
             String width = metaRetriever
@@ -148,29 +148,15 @@ public class VideoAssetActivity extends Activity implements TextureView.SurfaceT
 
 
     private void updateTextureViewSize() {
-        float scaleX;
-        float scaleY;
-
-        //пропорция между размерностью экрана и кадра
-        scaleX = mVideoWidth / mDisplayWidth;
-        scaleY = mVideoHeight / mDisplayHeight;
-
-        float scaleRegionW = mVideoWidth / Math.abs(ax - bx);
-        float scaleRegionH = mVideoHeight / Math.abs(ay - by);
-        float scaleRegion = scaleRegionW < scaleRegionH ? scaleRegionW : scaleRegionH;
-
+        float scaleX = mDisplayWidth / mVideoWidth, scaleY = mDisplayHeight / mVideoHeight;
+        float scale = mDisplayHeight / Math.abs(by - ay);
         Matrix matrix = new Matrix();
-        if (scaleX > scaleY) {
-            matrix.setScale(scaleRegion / scaleY, scaleRegion);
-            matrix.postTranslate(-ax * scaleRegion / scaleY, -ay * scaleRegion / scaleY);
-
-
-        } else {
-            matrix.setScale(scaleRegion, scaleRegion / scaleX);
-            matrix.postTranslate(-ax * scaleRegion / scaleX, -ay * scaleRegion / scaleX);
-        }
-        mTextureView.setTransform(matrix);
+        matrix.reset();
+        matrix.setScale(scale / scaleX, scale / scaleY);
+        //Без " / scaleX" результаты те же, что и с прошлым кодом
+        matrix.postTranslate(-scale * ax, -scale * ay);
         mTextureView.setLayoutParams(new FrameLayout.LayoutParams((int) mDisplayWidth, (int) mDisplayHeight));
+        mTextureView.setTransform(matrix);
     }
 
 
@@ -179,13 +165,14 @@ public class VideoAssetActivity extends Activity implements TextureView.SurfaceT
         Surface surface = new Surface(surfaceTexture);
 
         try {
-            if (PERMISSION_GRANTED != ActivityCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE)) {
+            if (PackageManager.PERMISSION_GRANTED != ActivityCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE)) {
                 ActivityCompat.requestPermissions(this,
                         new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE, Manifest.permission.READ_EXTERNAL_STORAGE},
                         1);
             }
 
             mMediaPlayer = new MediaPlayer();
+
             FileInputStream fileInputStream;
             try {
                 fileInputStream = new FileInputStream(path);
@@ -216,12 +203,18 @@ public class VideoAssetActivity extends Activity implements TextureView.SurfaceT
     @Override
     public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
         if (requestCode == 1) {
-            if (!(grantResults.length == 2 && grantResults[0] == PackageManager.PERMISSION_GRANTED)) {
+            if (grantResults.length == 2 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                Toast.makeText(this,
+                        "permission_storage_success",
+                        Toast.LENGTH_SHORT).show();
+
+            } else {
                 Toast.makeText(this,
                         "permission_storage_failure",
                         Toast.LENGTH_SHORT).show();
                 super.onRequestPermissionsResult(requestCode, permissions, grantResults);
             }
+            return;
         }
     }
 
