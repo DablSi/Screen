@@ -9,6 +9,9 @@ import android.provider.MediaStore;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.*;
 
@@ -55,7 +58,6 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    // UPDATED!
     private String getPath(Uri uri) {
         String[] projection = {MediaStore.Video.Media.DATA};
         Cursor cursor = getContentResolver().query(uri, projection, null, null, null);
@@ -68,6 +70,33 @@ public class MainActivity extends AppCompatActivity {
             return index;
         } else
             return null;
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.menu, menu);
+
+        MenuItem item = menu.findItem(R.id.spinner);
+        Spinner spinner = (Spinner) item.getActionView();
+
+        ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(this,
+                R.array.spinner_list_item_array, android.R.layout.simple_spinner_item);
+        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+
+        spinner.setAdapter(adapter);
+        spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            public void onItemSelected(AdapterView<?> parent,
+                                       View itemSelected, int selectedItemPosition, long selectedId) {
+
+                String[] choose = getResources().getStringArray(R.array.spinner_list_item_array);
+                Toast toast = Toast.makeText(getApplicationContext(),
+                        "Ваш выбор: " + choose[selectedItemPosition], Toast.LENGTH_SHORT);
+                toast.show();
+            }
+            public void onNothingSelected(AdapterView<?> parent) {
+            }
+        });
+        return true;
     }
 
     @Override
