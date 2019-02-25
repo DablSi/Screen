@@ -33,6 +33,8 @@
 
         <activity android:name=".Settings">
         </activity>
+        <activity android:name=".Search">
+        </activity>
     </application>
 
 </manifest>

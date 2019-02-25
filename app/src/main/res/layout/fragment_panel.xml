@@ -7,24 +7,6 @@
                 android:background="@color/colorAccent">
 
     <ImageButton android:layout_width="wrap_content" android:layout_height="wrap_content"
-                 android:src="@drawable/baseline_settings_white_24dp" android:id="@+id/second"
-                 android:layout_alignParentTop="true"
-                 android:layout_alignParentRight="true" android:paddingRight="48dp"
-                 android:paddingLeft="48dp"
-                 android:paddingTop="16dp"
-                 android:paddingBottom="16dp"
-                 android:background="@null"/>
-
-    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
-              android:text="Settings"
-              android:textColor="#ffffff"
-              android:layout_alignBottom="@+id/second"
-              android:layout_alignParentEnd="true"
-              android:layout_marginEnd="33dp" android:layout_alignParentRight="true" android:layout_marginRight="33dp"
-              android:id="@+id/set"
-              android:visibility="invisible"/>
-
-    <ImageButton android:layout_width="wrap_content" android:layout_height="wrap_content"
                  android:src="@drawable/baseline_add_circle_white_24dp" android:id="@+id/first"
                  android:paddingRight="48dp"
                  android:paddingLeft="48dp"
@@ -42,15 +24,36 @@
               android:textColor="#ffffff"/>
 
     <ImageButton android:layout_width="wrap_content" android:layout_height="wrap_content"
-                 android:src="@drawable/baseline_search_white_24dp" android:id="@+id/third"
+                 android:src="@drawable/baseline_search_white_24dp" android:id="@+id/second"
                  android:layout_centerHorizontal="true" android:paddingRight="48dp"
                  android:paddingLeft="48dp"
                  android:paddingTop="16dp"
                  android:paddingBottom="16dp"
                  android:background="@null"/>
-    <!--<TextView android:layout_width="wrap_content" android:layout_height="wrap_content"-->
-    <!--android:text="Search" android:layout_centerHorizontal="true"-->
-    <!--android:textColor="#ffffff"-->
-    <!--android:layout_alignBottom="@+id/third"/>-->
+
+    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+              android:text="Search" android:layout_centerHorizontal="true"
+              android:textColor="#ffffff"
+              android:id="@+id/search"
+              android:layout_alignBottom="@+id/second"
+              android:visibility="invisible"/>
+
+    <ImageButton android:layout_width="wrap_content" android:layout_height="wrap_content"
+                 android:src="@drawable/baseline_settings_white_24dp" android:id="@+id/third"
+                 android:layout_alignParentTop="true"
+                 android:layout_alignParentRight="true" android:paddingRight="48dp"
+                 android:paddingLeft="48dp"
+                 android:paddingTop="16dp"
+                 android:paddingBottom="16dp"
+                 android:background="@null"/>
+
+    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+              android:text="Settings"
+              android:textColor="#ffffff"
+              android:layout_alignBottom="@+id/third"
+              android:layout_alignParentEnd="true"
+              android:layout_marginEnd="33dp" android:layout_alignParentRight="true" android:layout_marginRight="33dp"
+              android:id="@+id/set"
+              android:visibility="invisible"/>
 
 </RelativeLayout>
