@@ -10,7 +10,6 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.Menu;
-import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.*;
@@ -44,9 +43,6 @@ public class MainActivity extends AppCompatActivity {
         if (resultCode == RESULT_OK) {
             if (requestCode == REQUEST_TAKE_GALLERY_VIDEO) {
                 Uri selectedImageUri = data.getData();
-
-                // OI FILE Manager
-                String filemanagerstring = selectedImageUri.getPath();
 
                 // MEDIA GALLERY
                 String selectedImagePath = getPath(selectedImageUri);
@@ -113,7 +109,7 @@ public class MainActivity extends AppCompatActivity {
         timePicker = findViewById(R.id.timePicker);
         textView = findViewById(R.id.textView);
 
-        ChangeText changeText = new ChangeText(Integer.MAX_VALUE, 500);
+        ChangeText changeText = new ChangeText(Integer.MAX_VALUE, 5000);
         changeText.start();
         timePicker.setIs24HourView(true);
 
@@ -166,7 +162,8 @@ public class MainActivity extends AppCompatActivity {
 
         @Override
         public void onTick(long l) {
-            textView.setText(getString(R.string.serv_time) + new Date(Sync.deltaT + System.currentTimeMillis()).toString());
+            SimpleDateFormat output = new SimpleDateFormat("HH:mm");
+            textView.setText(output.format(new Date(Sync.deltaT + System.currentTimeMillis())));
         }
 
         @Override
