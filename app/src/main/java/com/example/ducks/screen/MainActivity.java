@@ -89,9 +89,9 @@ public class MainActivity extends AppCompatActivity {
                                        View itemSelected, int selectedItemPosition, long selectedId) {
 
                 String[] choose = getResources().getStringArray(R.array.spinner_list_item_array);
-                Toast toast = Toast.makeText(getApplicationContext(),
-                        "Ваш выбор: " + choose[selectedItemPosition], Toast.LENGTH_SHORT);
-                toast.show();
+                if(choose[selectedItemPosition].equals("Файл")) {
+                    showFileChooser();
+                }
             }
             public void onNothingSelected(AdapterView<?> parent) {
             }
@@ -104,7 +104,6 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
-        showFileChooser();
         startService(new Intent(MainActivity.this, Sync.class));
         et1 = findViewById(R.id.edit1);
         et2 = findViewById(R.id.edit2);
