@@ -17,14 +17,15 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:id="@+id/textView"
-            android:layout_alignLeft="@id/timePicker" />
+            android:layout_alignLeft="@id/timePicker"/>
 
     <LinearLayout android:layout_width="match_parent"
                   android:layout_height="wrap_content"
                   android:orientation="horizontal"
                   android:layout_centerHorizontal="true"
                   android:layout_below="@+id/timePicker"
-                  android:id="@+id/lin">
+                  android:id="@+id/lin"
+                  android:theme="@style/AppTheme">
 
         <EditText
                 android:layout_width="match_parent"

@@ -85,7 +85,7 @@ public class Sync extends Service {
                     t1 = input.readLong();
                     t2 = input.readLong();
                     t3 = System.currentTimeMillis() + deltaT;
-                    D = (int) (t2 - (t1 + t3) / 2);
+                    D = (int) (t2 - ((t1 + deltaT) + (t3 + deltaT)) / 2);
                     deltaT += Math.abs(D) > 10 ? D / 10 : D;
                     Log.d(TAG, Long.toString(deltaT));
                     Thread.sleep(1000);
