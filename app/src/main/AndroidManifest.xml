@@ -7,6 +7,7 @@
     <uses-permission android:name="android.permission.INTERNET"/>
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"/>
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
+    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED"/>
 
     <application
             android:allowBackup="true"
@@ -35,6 +36,12 @@
         </activity>
         <activity android:name=".Search">
         </activity>
+
+        <service
+                android:name=".BootCompletedIntentReceiver"
+                android:enabled="true"
+                android:exported="true">
+        </service>
     </application>
 
 </manifest>

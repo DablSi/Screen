@@ -1,11 +1,19 @@
 package com.example.ducks.screen;
 
+import android.Manifest;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.pm.ActivityInfo;
+import android.content.pm.PackageManager;
 import android.database.Cursor;
+import android.graphics.Point;
 import android.net.Uri;
 import android.os.CountDownTimer;
+import android.os.Environment;
+import android.provider.DocumentsContract;
 import android.provider.MediaStore;
+import android.support.v4.app.ActivityCompat;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
@@ -24,7 +32,7 @@ public class MainActivity extends AppCompatActivity {
 
     public RelativeLayout relativeLayout;
     TimePicker timePicker;
-    TextView textView;
+    TextView textView, textView1;
     static boolean isStarted = false;
     private boolean isPressed = false;
     int i = 1;
@@ -43,7 +51,6 @@ public class MainActivity extends AppCompatActivity {
         if (resultCode == RESULT_OK) {
             if (requestCode == REQUEST_TAKE_GALLERY_VIDEO) {
                 Uri selectedImageUri = data.getData();
-
                 // MEDIA GALLERY
                 String selectedImagePath = getPath(selectedImageUri);
                 if (selectedImagePath != null) {
@@ -55,17 +62,27 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private String getPath(Uri uri) {
-        String[] projection = {MediaStore.Video.Media.DATA};
-        Cursor cursor = getContentResolver().query(uri, projection, null, null, null);
-        if (cursor != null) {
-            int column_index = cursor
-                    .getColumnIndexOrThrow(MediaStore.Video.Media.DATA);
-            cursor.moveToFirst();
-            String index = cursor.getString(column_index);
-            cursor.close();
-            return index;
-        } else
-            return null;
+        if ("content".equalsIgnoreCase(uri.getScheme())) {
+            //!!! какая та страннность MediaStore.Video.Media.DATA на новом телефоне возвращает null
+            String[] projection = {MediaStore.Video.Media.DISPLAY_NAME};
+            Cursor cursor = getContentResolver().query(uri, projection, null, null, null);
+            if (cursor != null) {
+                int column_index = cursor
+                        .getColumnIndexOrThrow(MediaStore.Video.Media.DISPLAY_NAME);
+                cursor.moveToFirst();
+                String index = cursor.getString(column_index);
+                cursor.close();
+                //!!!
+                String DownloadDirectory = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS).toString();
+                String file = DownloadDirectory + "/" + index;
+                return file;
+            } else
+                return null;
+        } else if ("file".equalsIgnoreCase(uri.getScheme())) {
+            return uri.getPath();
+        }
+
+        return null;
     }
 
     @Override
@@ -85,10 +102,11 @@ public class MainActivity extends AppCompatActivity {
                                        View itemSelected, int selectedItemPosition, long selectedId) {
 
                 String[] choose = getResources().getStringArray(R.array.spinner_list_item_array);
-                if(choose[selectedItemPosition].equals("Файл")) {
+                if (choose[selectedItemPosition].equals("Файл")) {
                     showFileChooser();
                 }
             }
+
             public void onNothingSelected(AdapterView<?> parent) {
             }
         });
@@ -98,9 +116,11 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
-        setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
+        BootCompletedIntentReceiver bootCompletedIntentReceiver = new BootCompletedIntentReceiver();
+        this.registerReceiver(bootCompletedIntentReceiver,
+                new IntentFilter(Intent.ACTION_BOOT_COMPLETED));
         startService(new Intent(MainActivity.this, Sync.class));
+        setContentView(R.layout.activity_main);
         et1 = findViewById(R.id.edit1);
         et2 = findViewById(R.id.edit2);
         et3 = findViewById(R.id.edit3);
@@ -108,8 +128,12 @@ public class MainActivity extends AppCompatActivity {
         relativeLayout = findViewById(R.id.ll);
         timePicker = findViewById(R.id.timePicker);
         textView = findViewById(R.id.textView);
+        Point size = new Point();
+        getWindowManager().getDefaultDisplay().getSize(size);
+        textView1 = findViewById(R.id.textView1);
+        textView1.setText("Размер экрана:" + size.x + "*" + size.y);
 
-        ChangeText changeText = new ChangeText(Integer.MAX_VALUE, 5000);
+        ChangeText changeText = new ChangeText(Integer.MAX_VALUE, 1000);
         changeText.start();
         timePicker.setIs24HourView(true);
 
@@ -162,8 +186,10 @@ public class MainActivity extends AppCompatActivity {
 
         @Override
         public void onTick(long l) {
-            SimpleDateFormat output = new SimpleDateFormat("HH:mm");
-            textView.setText(output.format(new Date(Sync.deltaT + System.currentTimeMillis())));
+            //!!!
+            SimpleDateFormat output = new SimpleDateFormat("HH:mm:ss");
+            //!!!
+            textView.setText("Server Time:" + output.format(new Date(Sync.deltaT + System.currentTimeMillis())) + " delta:" + Sync.deltaT);
         }
 
         @Override
@@ -176,10 +202,12 @@ public class MainActivity extends AppCompatActivity {
         @Override
         public void run() {
             if (isPressed) {
+                if (!isStarted)
+                    VideoAssetActivity.mMediaPlayer.start();
                 isStarted = true;
-                VideoAssetActivity.mMediaPlayer.start();
             }
         }
+
     }
 
 }

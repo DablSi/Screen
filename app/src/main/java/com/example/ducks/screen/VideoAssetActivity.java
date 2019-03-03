@@ -46,7 +46,6 @@ public class VideoAssetActivity extends Activity implements TextureView.SurfaceT
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.texture_video_crop);
-        setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
         calculateVideoSize();
         initView();
     }

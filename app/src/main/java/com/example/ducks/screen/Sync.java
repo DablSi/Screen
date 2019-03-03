@@ -11,12 +11,13 @@ import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.net.Socket;
+import java.util.Date;
 
 import static android.content.ContentValues.TAG;
 
 public class Sync extends Service {
-    int D = 0;
-    static int deltaT = 0;
+    double D = 0;
+    static double deltaT = 0;
     public static String date;
     static long t1, t2, t3;
 
@@ -79,15 +80,16 @@ public class Sync extends Service {
             }
             try {
                 while (true) {
-                    t1 = System.currentTimeMillis() + deltaT;
+                    t1 = (int) (System.currentTimeMillis() + deltaT);
                     outputStream.writeLong(t1);
                     outputStream.flush();
                     t1 = input.readLong();
                     t2 = input.readLong();
-                    t3 = System.currentTimeMillis() + deltaT;
-                    D = (int) (t2 - ((t1 + deltaT) + (t3 + deltaT)) / 2);
+                    t3 = (int) (System.currentTimeMillis() + deltaT);
+                    D = (int) (t2 - (t1 + t3) / 2);
                     deltaT += Math.abs(D) > 10 ? D / 10 : D;
-                    Log.d(TAG, Long.toString(deltaT));
+                    Log.d(TAG, deltaT + " " + D);
+                    Log.e(TAG, new Date(t2).toString());
                     Thread.sleep(1000);
                 }
 
