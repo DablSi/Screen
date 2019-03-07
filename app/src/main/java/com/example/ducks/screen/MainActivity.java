@@ -144,7 +144,7 @@ public class MainActivity extends AppCompatActivity {
                     SimpleDateFormat formatter = new SimpleDateFormat("dd.MM.yyyy-", Locale.getDefault());
                     Date date = new Date();
                     Date runIn = new SimpleDateFormat("dd.MM.yyyy-HH:mm", Locale.getDefault()).parse(formatter.format(date) + i + ":" + i1);
-                    long dif = runIn.getTime() - (System.currentTimeMillis() + Sync.deltaT);
+                    long dif = runIn.getTime() - (System.currentTimeMillis() + (int)Sync.deltaT);
                     if (dif <= 0) {
                         Toast.makeText(getApplicationContext(), getString(R.string.time_less), Toast.LENGTH_SHORT).show();
                     } else {
@@ -189,7 +189,7 @@ public class MainActivity extends AppCompatActivity {
             //!!!
             SimpleDateFormat output = new SimpleDateFormat("HH:mm:ss");
             //!!!
-            textView.setText("Server Time:" + output.format(new Date(Sync.deltaT + System.currentTimeMillis())) + " delta:" + Sync.deltaT);
+            textView.setText("Server Time:" + output.format(new Date((int) Sync.deltaT + System.currentTimeMillis())) + " delta:" + Sync.deltaT);
         }
 
         @Override
