@@ -38,7 +38,7 @@
         </activity>
 
         <service
-                android:name=".BootCompletedIntentReceiver"
+                android:name=".StartSync"
                 android:enabled="true"
                 android:exported="true">
         </service>

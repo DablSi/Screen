@@ -8,6 +8,7 @@ import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.graphics.Point;
 import android.net.Uri;
+import android.os.AsyncTask;
 import android.os.CountDownTimer;
 import android.os.Environment;
 import android.provider.DocumentsContract;
@@ -116,11 +117,9 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        BootCompletedIntentReceiver bootCompletedIntentReceiver = new BootCompletedIntentReceiver();
-        this.registerReceiver(bootCompletedIntentReceiver,
-                new IntentFilter(Intent.ACTION_BOOT_COMPLETED));
-        startService(new Intent(MainActivity.this, Sync.class));
         setContentView(R.layout.activity_main);
+        NewThread newThread = new NewThread();
+        newThread.execute();
         et1 = findViewById(R.id.edit1);
         et2 = findViewById(R.id.edit2);
         et3 = findViewById(R.id.edit3);
@@ -209,5 +208,15 @@ public class MainActivity extends AppCompatActivity {
         }
 
     }
+
+    class NewThread extends AsyncTask<Void, Void, Void> {
+
+        @Override
+        protected Void doInBackground(Void... voids) {
+            startService(new Intent(MainActivity.this, StartSync.class));
+            return null;
+        }
+    }
+
 
 }
