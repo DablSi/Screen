@@ -15,14 +15,17 @@ import java.net.Socket;
 import static android.content.ContentValues.TAG;
 
 public class Sync extends Service {
+    public static boolean isStarted = false;
     int D = 0;
     static float deltaT = 0;
     public static String date;
     static long t1, t2, t3;
+    public Socket socket;
 
     private SyncThread syncThread;
 
     public Sync() {
+        isStarted = true;
     }
 
     @Override
@@ -62,11 +65,18 @@ public class Sync extends Service {
 
         @Override
         protected Void doInBackground(Void... voids) {
-            Socket socket = null;
+            socket = null;
+            isStarted = true;
             try {
                 socket = new Socket("178.79.155.166", 5001);
             } catch (IOException e) {
-                e.printStackTrace();
+                Log.e("Everything is bad: ", "Not connected");
+            }
+            if(socket == null){
+                startService(new Intent(Sync.this, Sync.class));
+                isStarted = false;
+                stopService(new Intent(Sync.this, Sync.class));
+                return null;
             }
             Log.e("Everything is fine: ", "Connected");
             DataInputStream input = null;

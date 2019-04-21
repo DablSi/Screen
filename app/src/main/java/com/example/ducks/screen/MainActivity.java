@@ -188,7 +188,7 @@ public class MainActivity extends AppCompatActivity {
             //!!!
             SimpleDateFormat output = new SimpleDateFormat("HH:mm:ss");
             //!!!
-            textView.setText("Server Time:" + output.format(new Date((int) Sync.deltaT + System.currentTimeMillis())) + " delta:" + Sync.deltaT);
+            textView.setText("Server Time:" + output.format(new Date((int) Sync.deltaT + System.currentTimeMillis())) /*+ " delta:" + Sync.deltaT*/);
         }
 
         @Override
@@ -201,7 +201,7 @@ public class MainActivity extends AppCompatActivity {
         @Override
         public void run() {
             if (isPressed) {
-                if (!isStarted)
+                //if (!isStarted)
                     VideoAssetActivity.mMediaPlayer.start();
                 isStarted = true;
             }
@@ -213,7 +213,9 @@ public class MainActivity extends AppCompatActivity {
 
         @Override
         protected Void doInBackground(Void... voids) {
-            startService(new Intent(MainActivity.this, StartSync.class));
+            if(!Sync.isStarted)
+                startService(new Intent(MainActivity.this, Sync.class));
+            //startService(new Intent(MainActivity.this, Autorun.class));
             return null;
         }
     }
