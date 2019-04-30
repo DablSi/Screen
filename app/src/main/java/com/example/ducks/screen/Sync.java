@@ -49,7 +49,8 @@ public class Sync extends Service {
     @Override
     public void onDestroy() {
         //сообщение об остановке службы
-        Toast.makeText(this, "Service stoped", Toast.LENGTH_SHORT).show();
+        //Toast.makeText(this, "Service stoped", Toast.LENGTH_SHORT).show();
+        startService(new Intent(this, Sync.class));
     }
 
     @Override

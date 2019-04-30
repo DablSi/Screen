@@ -33,12 +33,14 @@ public class MainActivity extends AppCompatActivity {
 
     public RelativeLayout relativeLayout;
     TimePicker timePicker;
-    TextView textView, textView1;
+    TextView textView;
     static boolean isStarted = false;
     private boolean isPressed = false;
     int i = 1;
     private EditText et1, et2, et3, et4;
+    private Spinner spinner;
     private Timer timer;
+    private ArrayAdapter<CharSequence> adapter;
     private static final int REQUEST_TAKE_GALLERY_VIDEO = 0;
 
     private void showFileChooser() {
@@ -91,9 +93,9 @@ public class MainActivity extends AppCompatActivity {
         getMenuInflater().inflate(R.menu.menu, menu);
 
         MenuItem item = menu.findItem(R.id.spinner);
-        Spinner spinner = (Spinner) item.getActionView();
+        spinner = (Spinner) item.getActionView();
 
-        ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(this,
+        adapter = ArrayAdapter.createFromResource(this,
                 R.array.spinner_list_item_array, android.R.layout.simple_spinner_item);
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
 
@@ -105,6 +107,9 @@ public class MainActivity extends AppCompatActivity {
                 String[] choose = getResources().getStringArray(R.array.spinner_list_item_array);
                 if (choose[selectedItemPosition].equals("Файл")) {
                     showFileChooser();
+                }
+                else if(choose[selectedItemPosition].equals("Фото")){
+                    startActivity(new Intent(MainActivity.this, Camera.class));
                 }
             }
 
@@ -129,8 +134,8 @@ public class MainActivity extends AppCompatActivity {
         textView = findViewById(R.id.textView);
         Point size = new Point();
         getWindowManager().getDefaultDisplay().getSize(size);
-        textView1 = findViewById(R.id.textView1);
-        textView1.setText("Размер экрана:" + size.x + "*" + size.y);
+        /*textView1 = findViewById(R.id.textView1);
+        textView1.setText("Размер экрана:" + size.x + "*" + size.y);*/
 
         ChangeText changeText = new ChangeText(Integer.MAX_VALUE, 1000);
         changeText.start();
@@ -175,6 +180,14 @@ public class MainActivity extends AppCompatActivity {
                 startActivity(intent1);
             }
         });
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        if(spinner != null && adapter != null){
+            spinner.setAdapter(adapter);
+        }
     }
 
     class ChangeText extends CountDownTimer {
