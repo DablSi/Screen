@@ -83,7 +83,7 @@ public class Search extends AppCompatActivity {
                 }
             }
             try {
-                Thread.sleep(time - (System.currentTimeMillis() + (int) Sync.deltaT) - 70);
+                Thread.sleep(time - (System.currentTimeMillis() + (int) Sync.deltaT) - 120);
                 linearLayout = findViewById(R.id.ll);
                 runOnUiThread(new Runnable() {
                     @Override
