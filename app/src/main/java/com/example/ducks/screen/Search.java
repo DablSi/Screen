@@ -21,6 +21,8 @@ import java.io.DataOutputStream;
 import java.io.IOException;
 import java.net.Socket;
 import java.util.Currency;
+import java.util.Timer;
+import java.util.TimerTask;
 import java.util.concurrent.ExecutionException;
 
 public class Search extends AppCompatActivity {
@@ -82,18 +84,19 @@ public class Search extends AppCompatActivity {
                     e.printStackTrace();
                 }
             }
-            try {
-                Thread.sleep(time - (System.currentTimeMillis() + (int) Sync.deltaT) - 120);
-                linearLayout = findViewById(R.id.ll);
-                runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        linearLayout.setBackgroundColor(0xff303f9f);
-                    }
-                });
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
+            Timer timer = new Timer();
+            timer.schedule(new TimerTask() {
+                @Override
+                public void run() {
+                    linearLayout = findViewById(R.id.ll);
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            linearLayout.setBackgroundColor(0xff303f9f);
+                        }
+                    });
+                }
+            }, time - (System.currentTimeMillis() + (int)Sync.deltaT) - 110);
         }
     }
 }
