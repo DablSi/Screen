@@ -315,19 +315,19 @@ public class Camera extends AppCompatActivity {
             SendThread sendThread = new SendThread();
             t = System.currentTimeMillis() + (int) Sync.deltaT + 500;
             sendThread.start();
-            try {
-                Thread.sleep(t - (System.currentTimeMillis() + (int) Sync.deltaT));
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
-            long t1 = System.currentTimeMillis();
-            bitmap = textureView.getBitmap();
-            try {
-                Thread.sleep(20 - (System.currentTimeMillis() - t1) > 0 ? 20 - (System.currentTimeMillis() - t1) : 0);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
-            bitmap2 = textureView.getBitmap();
+            Timer timer = new Timer();
+            timer.schedule(new TimerTask() {
+                @Override
+                public void run() {
+                    bitmap = textureView.getBitmap();
+                }
+            }, t);
+            timer.schedule(new TimerTask() {
+                @Override
+                public void run() {
+                    bitmap2 = textureView.getBitmap();
+                }
+            }, t + 30);
             new CordThread().start();
             /*try {
                 Thread.sleep(10);
