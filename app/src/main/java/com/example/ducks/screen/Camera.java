@@ -333,7 +333,7 @@ public class Camera extends AppCompatActivity {
                     bitmap2 = textureView.getBitmap();
                     new CordThread().start();
                 }
-            }, t - (System.currentTimeMillis() + (int)Sync.deltaT) + 45);
+            }, t - (System.currentTimeMillis() + (int)Sync.deltaT) + 25);
             /*try {
                 Thread.sleep(10);
             } catch (InterruptedException e) {
