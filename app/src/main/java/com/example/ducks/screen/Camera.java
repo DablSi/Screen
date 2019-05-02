@@ -313,7 +313,7 @@ public class Camera extends AppCompatActivity {
         @Override
         public void run() {
             SendThread sendThread = new SendThread();
-            t = System.currentTimeMillis() + (int) Sync.deltaT + 1000;
+            t = System.currentTimeMillis() + (int) Sync.deltaT + 500;
             sendThread.start();
             try {
                 Thread.sleep(t - (System.currentTimeMillis() + (int) Sync.deltaT));
@@ -323,11 +323,10 @@ public class Camera extends AppCompatActivity {
             long t1 = System.currentTimeMillis();
             bitmap = textureView.getBitmap();
             try {
-                Thread.sleep(10);
+                Thread.sleep(20 - (System.currentTimeMillis() - t1) > 0 ? 20 - (System.currentTimeMillis() - t1) : 0);
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
-            Log.e("VAAAA", System.currentTimeMillis() - t1 + "");
             bitmap2 = textureView.getBitmap();
             new CordThread().start();
             /*try {
