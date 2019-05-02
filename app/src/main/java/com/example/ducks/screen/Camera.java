@@ -333,7 +333,7 @@ public class Camera extends AppCompatActivity {
                     bitmap2 = textureView.getBitmap();
                     new CordThread().start();
                 }
-            }, t - (System.currentTimeMillis() + (int)Sync.deltaT) + 35);
+            }, t - (System.currentTimeMillis() + (int)Sync.deltaT) + 45);
             /*try {
                 Thread.sleep(10);
             } catch (InterruptedException e) {
@@ -399,7 +399,6 @@ public class Camera extends AppCompatActivity {
 
 
             LinkedList<Point> linkedList = new LinkedList<>();
-
             for (int i = 0; i < bitmap.getHeight(); i++) {
                 for (int j = 0; j < bitmap.getWidth(); j++) {
                     if (bitmap.getPixel(j, i) != bitmap2.getPixel(j, i)) {
@@ -449,8 +448,8 @@ public class Camera extends AppCompatActivity {
                     if (item.getValue().size() != a / j)
                         it.remove();
                 }
-                Log.e("PHOTO", Collections.min(treeMap.keySet()) + ";" + treeMap.get(Collections.min(treeMap.keySet())).get(0)
-                        + " " + Collections.max(treeMap.keySet()) + ";" + treeMap.get(Collections.max(treeMap.keySet())).get(0));
+//                Log.e("PHOTO", Collections.min(treeMap.keySet()) + ";" + treeMap.get(Collections.min(treeMap.keySet())).get(0)
+//                        + " " + Collections.max(treeMap.keySet()) + ";" + treeMap.get(Collections.max(treeMap.keySet())).get(0));
             }
         }
     }

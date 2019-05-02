@@ -2,6 +2,7 @@ package com.example.ducks.screen;
 
 import android.graphics.Color;
 import android.os.AsyncTask;
+import android.os.Build;
 import android.provider.Settings;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -31,10 +32,30 @@ public class Search extends AppCompatActivity {
     private static String URL = "http://192.168.1.8:8080/";
     private String android_id;
 
+    private void hideSystemUI() {
+        // Enables regular immersive mode.
+        // For "lean back" mode, remove SYSTEM_UI_FLAG_IMMERSIVE.
+        // Or for "sticky immersive," replace it with SYSTEM_UI_FLAG_IMMERSIVE_STICKY
+        View decorView = getWindow().getDecorView();
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
+            decorView.setSystemUiVisibility(
+                    View.SYSTEM_UI_FLAG_IMMERSIVE
+                            // Set the content to appear under the system bars so that the
+                            // content doesn't resize when the system bars hide and show.
+                            | View.SYSTEM_UI_FLAG_LAYOUT_STABLE
+                            | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
+                            | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
+                            // Hide the nav bar and status bar
+                            | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
+                            | View.SYSTEM_UI_FLAG_FULLSCREEN);
+        }
+    }
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_search);
+        hideSystemUI();
         android_id = android.provider.Settings.Secure.getString(this.getContentResolver(),
                 Settings.Secure.ANDROID_ID);
         SendThread sendThread = new SendThread();
@@ -96,7 +117,7 @@ public class Search extends AppCompatActivity {
                         }
                     });
                 }
-            }, time - (System.currentTimeMillis() + (int)Sync.deltaT) - 110);
+            }, time - (System.currentTimeMillis() + (int)Sync.deltaT) - 108);
         }
     }
 }
