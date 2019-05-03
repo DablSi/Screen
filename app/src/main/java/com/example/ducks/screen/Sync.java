@@ -99,7 +99,7 @@ public class Sync extends Service {
                     D = (int) (t2 - (t1 + t3) / 2);
                     deltaT += (float)D / 10;
                     Log.d(TAG, Long.toString((int) deltaT));
-                    Thread.sleep(1000);
+                    Thread.sleep(400);
                 }
 
             } catch (Exception e) {
