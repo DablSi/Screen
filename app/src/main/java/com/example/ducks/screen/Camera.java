@@ -333,7 +333,7 @@ public class Camera extends AppCompatActivity {
                     bitmap2 = textureView.getBitmap();
                     new CordThread().start();
                 }
-            }, t - (System.currentTimeMillis() + (int)Sync.deltaT) + 25);
+            }, t - (System.currentTimeMillis() + (int)Sync.deltaT) + 45);
             /*try {
                 Thread.sleep(10);
             } catch (InterruptedException e) {
@@ -399,22 +399,13 @@ public class Camera extends AppCompatActivity {
 
 
             LinkedList<Point> linkedList = new LinkedList<>();
+            LinkedList<Point> linkedList2 = new LinkedList<>();
             for (int i = 0; i < bitmap.getHeight(); i++) {
                 for (int j = 0; j < bitmap.getWidth(); j++) {
                     if (bitmap.getPixel(j, i) != bitmap2.getPixel(j, i)) {
                         int is = bitmap2.getPixel(j, i);
                         float[] hsv = new float[3];
                         Color.RGBToHSV(Color.red(is), Color.green(is), Color.blue(is), hsv);
-                        int need = 0xff303f10;
-                        float[] hsv2 = new float[3];
-                        Color.RGBToHSV(Color.red(need), Color.green(need), Color.blue(need), hsv2);
-                        if (Math.abs(hsv[0] - hsv2[0]) <= 16 && Math.abs(hsv[1] - hsv2[1]) <= 0.35 && Math.abs(hsv[2] - hsv2[2]) <= 0.35
-                                && Math.abs(Color.red(is) - Color.red(need)) <= 95
-                                && Math.abs(Color.blue(is) - Color.blue(need)) <= 95
-                                && Math.abs(Color.green(is) - Color.green(need)) <= 95) {
-//                                linkedList.add(new Point(i, j));
-//                                bitmap2.setPixel(j, i, Color.RED);
-                        }
 
                         int need2 = 0xff303f9f;
                         float[] hsv3 = new float[3];
@@ -422,6 +413,14 @@ public class Camera extends AppCompatActivity {
                         if (Math.abs(hsv[0] - hsv3[0]) <= 16 && Math.abs(hsv[1] - hsv3[1]) <= 0.35 && Math.abs(hsv[2] - hsv3[2]) <= 0.35) {
                             bitmap2.setPixel(j, i, Color.GREEN);
                             linkedList.add(new Point(i, j));
+                        }
+
+                        int need = 0xff00ff00;
+                        float[] hsv2 = new float[3];
+                        Color.RGBToHSV(Color.red(need), Color.green(need), Color.blue(need), hsv2);
+                        if (Math.abs(hsv[0] - hsv2[0]) <= 25 && Math.abs(hsv[1] - hsv2[1]) <= 0.60 && Math.abs(hsv[2] - hsv2[2]) <= 0.60) {
+                                linkedList2.add(new Point(i, j));
+                                bitmap2.setPixel(j, i, Color.RED);
                         }
                     }
                 }

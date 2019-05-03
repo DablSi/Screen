@@ -117,7 +117,7 @@ public class Search extends AppCompatActivity {
                         }
                     });
                 }
-            }, time - (System.currentTimeMillis() + (int)Sync.deltaT) - 120);
+            }, time - (System.currentTimeMillis() + (int)Sync.deltaT) - 105);
         }
     }
 }
