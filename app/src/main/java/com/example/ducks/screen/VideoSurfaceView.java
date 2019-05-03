@@ -63,7 +63,6 @@ public class VideoSurfaceView extends SurfaceView implements SurfaceHolder.Callb
                 Canvas canvas = surfaceHolder.lockCanvas();
                 Paint paint = new Paint();
                 try {
-                    // здесь делаем то что нужно запустить одновременно
                     Bitmap bm = Bitmap.createBitmap(BitmapFactory.decodeResource(getResources(), getResources().getIdentifier("out" + i, "drawable", "com.example.ducks.screen")));
                     width = bm.getWidth();
                     height = bm.getHeight();

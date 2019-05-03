@@ -4,23 +4,28 @@ import android.content.Intent;
 import android.database.Cursor;
 import android.graphics.Point;
 import android.net.Uri;
-import android.os.AsyncTask;
-import android.os.CountDownTimer;
-import android.os.Environment;
+import android.os.*;
 import android.provider.MediaStore;
+import android.support.annotation.RequiresApi;
 import android.support.v7.app.AppCompatActivity;
-import android.os.Bundle;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.*;
+import retrofit2.Retrofit;
+import retrofit2.converter.gson.GsonConverterFactory;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.nio.file.Files;
 import java.text.*;
 import java.util.Date;
 import java.util.Locale;
 import java.util.Timer;
 import java.util.TimerTask;
+
 
 public class MainActivity extends AppCompatActivity {
 
@@ -35,6 +40,7 @@ public class MainActivity extends AppCompatActivity {
     private Timer timer;
     private ArrayAdapter<CharSequence> adapter;
     private static final int REQUEST_TAKE_GALLERY_VIDEO = 0;
+    public static byte[] video;
 
     private void showFileChooser() {
         Intent intent = new Intent();
@@ -52,6 +58,12 @@ public class MainActivity extends AppCompatActivity {
                 if (selectedImagePath != null) {
                     Log.e("FILE", selectedImagePath);
                     Video.path = selectedImagePath;
+                    try {
+                        video = new byte[(int) new File(selectedImagePath).length()];
+                        new FileInputStream(new File(selectedImagePath)).read(video);
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
                 }
             }
         }

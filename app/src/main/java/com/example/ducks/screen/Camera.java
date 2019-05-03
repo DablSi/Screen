@@ -38,6 +38,8 @@ import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.concurrent.ExecutionException;
 
+import static com.example.ducks.screen.MainActivity.video;
+
 @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
 public class Camera extends AppCompatActivity {
     private CameraManager cameraManager;
@@ -380,6 +382,12 @@ public class Camera extends AppCompatActivity {
             try {
                 call.execute();
                 Log.d("SEND_AND_RETURN", "" + (t - (System.currentTimeMillis() + (int) Sync.deltaT)));
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            Call<Void> videoCall = service.putVideo(video, room);
+            try {
+                videoCall.execute();
             } catch (IOException e) {
                 e.printStackTrace();
             }

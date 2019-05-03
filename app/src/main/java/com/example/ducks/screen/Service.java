@@ -5,6 +5,7 @@ import retrofit2.Call;
 import retrofit2.http.*;
 
 import java.util.Arrays;
+import java.util.Date;
 import java.util.LinkedList;
 
 public interface Service {
@@ -40,6 +41,14 @@ public interface Service {
     @GET("/get/room")
     public Call<Integer> getRoom();
 
+    //Добавить видео
+    @Multipart
+    @POST("/post/video")
+    public Call<Void> putVideo(@Part("bytes") byte[] bytes, @Part("room") int room);
+
+    //Получение видео
+    @GET("/get/video/{room}")
+    public Call<byte[]> getVideo(@Path("room") int room);
 
     //Данные каждого гаджета
     class DeviceData {
@@ -55,6 +64,7 @@ public interface Service {
     class RoomData {
         public LinkedList<String> deviceList;
         public Long time;
+        public byte[] video;
 
         public RoomData() {
             deviceList = new LinkedList<>();
@@ -72,4 +82,6 @@ public interface Service {
             this.y2 = y2;
         }
     }
+
+
 }
