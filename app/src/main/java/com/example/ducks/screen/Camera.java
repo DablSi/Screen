@@ -368,7 +368,15 @@ public class Camera extends AppCompatActivity {
                     .addConverterFactory(GsonConverterFactory.create())
                     .build();
             Service service = retrofit.create(Service.class);
-            Call<Void> call = service.put(android_id, 0, t);
+            Call<Integer> integerCall = service.getRoom();
+            int room = 1;
+            try {
+                Response<Integer> integerResponse = integerCall.execute();
+                room = integerResponse.body();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            Call<Void> call = service.putDevice(android_id, room, t);
             try {
                 call.execute();
                 Log.d("SEND_AND_RETURN", "" + (t - (System.currentTimeMillis() + (int) Sync.deltaT)));
@@ -426,6 +434,8 @@ public class Camera extends AppCompatActivity {
                 }
             }
 
+            //Point b1 = linkedList.get(0), b2 = linkedList.getLast();
+            Point g1 = linkedList2.get(0), g2 = linkedList2.getLast();
             TreeMap<Integer, LinkedList<Integer>> treeMap = new TreeMap<>();
             if (linkedList.size() > 0) {
                 for (Point i : linkedList) {

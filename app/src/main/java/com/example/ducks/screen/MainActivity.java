@@ -1,20 +1,13 @@
 package com.example.ducks.screen;
 
-import android.Manifest;
 import android.content.Intent;
-import android.content.IntentFilter;
-import android.content.pm.ActivityInfo;
-import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.graphics.Point;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.CountDownTimer;
 import android.os.Environment;
-import android.provider.DocumentsContract;
 import android.provider.MediaStore;
-import android.support.v4.app.ActivityCompat;
-import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
@@ -58,7 +51,7 @@ public class MainActivity extends AppCompatActivity {
                 String selectedImagePath = getPath(selectedImageUri);
                 if (selectedImagePath != null) {
                     Log.e("FILE", selectedImagePath);
-                    VideoAssetActivity.path = selectedImagePath;
+                    Video.path = selectedImagePath;
                 }
             }
         }
@@ -170,13 +163,13 @@ public class MainActivity extends AppCompatActivity {
                         et2.getText().toString().equals("") ||
                         et3.getText().toString().equals("") ||
                         et4.getText().toString().equals(""))) {
-                    VideoAssetActivity.ax = Integer.parseInt(et1.getText().toString());
-                    VideoAssetActivity.ay = Integer.parseInt(et2.getText().toString());
-                    VideoAssetActivity.bx = Integer.parseInt(et3.getText().toString());
-                    VideoAssetActivity.by = Integer.parseInt(et4.getText().toString());
+                    Video.ax = Integer.parseInt(et1.getText().toString());
+                    Video.ay = Integer.parseInt(et2.getText().toString());
+                    Video.bx = Integer.parseInt(et3.getText().toString());
+                    Video.by = Integer.parseInt(et4.getText().toString());
                 }
                 isPressed = true;
-                Intent intent1 = new Intent(MainActivity.this, VideoAssetActivity.class);
+                Intent intent1 = new Intent(MainActivity.this, Video.class);
                 startActivity(intent1);
             }
         });
@@ -215,7 +208,7 @@ public class MainActivity extends AppCompatActivity {
         public void run() {
             if (isPressed) {
                 //if (!isStarted)
-                    VideoAssetActivity.mMediaPlayer.start();
+                    Video.mMediaPlayer.start();
                 isStarted = true;
             }
         }

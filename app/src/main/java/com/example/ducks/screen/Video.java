@@ -3,9 +3,7 @@ package com.example.ducks.screen;
 import android.Manifest;
 import android.annotation.SuppressLint;
 import android.app.Activity;
-import android.content.pm.ActivityInfo;
 import android.content.pm.PackageManager;
-import android.content.res.AssetFileDescriptor;
 import android.graphics.*;
 import android.media.MediaMetadataRetriever;
 import android.media.MediaPlayer;
@@ -25,11 +23,9 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 
-import static android.content.pm.PackageManager.*;
-
-public class VideoAssetActivity extends Activity implements TextureView.SurfaceTextureListener {
+public class Video extends Activity implements TextureView.SurfaceTextureListener {
     // Log tag
-    private static final String TAG = VideoAssetActivity.class.getName();
+    private static final String TAG = Video.class.getName();
     // Asset video file name
     private float mVideoWidth;
     private float mVideoHeight;

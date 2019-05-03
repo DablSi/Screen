@@ -31,6 +31,7 @@ public class Search extends AppCompatActivity {
     boolean isClicked = false, isTrue = true;
     private static String URL = "http://192.168.1.8:8080/";
     private String android_id;
+    private int color = 0x0ff000000;
 
     private void hideSystemUI() {
         // Enables regular immersive mode.
@@ -71,12 +72,20 @@ public class Search extends AppCompatActivity {
                     .addConverterFactory(GsonConverterFactory.create())
                     .build();
             Service service = retrofit.create(Service.class);
-            Call<Void> call = service.put(android_id, 0, null /*System.currentTimeMillis() + (int)Sync.deltaT + 10000*/);
+            Call<Void> call = service.putDevice(android_id, 0, null /*System.currentTimeMillis() + (int)Sync.deltaT + 10000*/);
             try {
                 call.execute();
                 Log.d("SEND_AND_RETURN", "Ready.");
                 GetThread getThread = new GetThread();
                 getThread.start();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+
+            Call<Integer> call2 = service.getColor(android_id);
+            try {
+                Response<Integer> colorResponse = call2.execute();
+                color = colorResponse.body();
             } catch (IOException e) {
                 e.printStackTrace();
             }
@@ -95,7 +104,7 @@ public class Search extends AppCompatActivity {
                     .build();
             Service service = retrofit.create(Service.class);
             while (time == null) {
-                Call<Long> call = service.get(android_id);
+                Call<Long> call = service.getTime(android_id);
                 try {
                     Response<Long> userResponse = call.execute();
                     time = userResponse.body();
@@ -113,11 +122,11 @@ public class Search extends AppCompatActivity {
                     runOnUiThread(new Runnable() {
                         @Override
                         public void run() {
-                            linearLayout.setBackgroundColor(0xff303f9f);
+                            linearLayout.setBackgroundColor(color);
                         }
                     });
                 }
-            }, time - (System.currentTimeMillis() + (int)Sync.deltaT) - 105);
+            }, time - (System.currentTimeMillis() + (int) Sync.deltaT) - 110);
         }
     }
 }
