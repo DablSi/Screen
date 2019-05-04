@@ -44,7 +44,7 @@ public interface Service {
     //Добавить видео
     @Multipart
     @POST("/post/video")
-    public Call<Void> putVideo(@Part("bytes") byte[] bytes, @Part("room") int room);
+    public Call<Void> putVideo(@Part("bytes") String bytes, @Part("room") int room);
 
     //Получение видео
     @GET("/get/video/{room}")

@@ -58,7 +58,6 @@ public class Camera extends AppCompatActivity {
     private ImageReader mImageReader;
     private Bitmap bitmap, bitmap2;
     private Size previewSize;
-    private File galleryFolder, galleryFolder2;
     private static String URL = "http://192.168.1.8:8080/";
     private String android_id;
     private long t;
@@ -91,7 +90,7 @@ public class Camera extends AppCompatActivity {
                     Display display = getWindowManager().getDefaultDisplay();
                     Point size = new Point();
                     display.getSize(size);
-                    previewSize = chooseOptimalSize(streamConfigurationMap.getOutputSizes(SurfaceTexture.class), size.y, size.x);
+                    //previewSize = chooseOptimalSize(streamConfigurationMap.getOutputSizes(SurfaceTexture.class), size.y, size.x);
                     this.cameraId = cameraId;
                 }
             }
@@ -120,7 +119,7 @@ public class Camera extends AppCompatActivity {
     private void createPreviewSession() {
         try {
             SurfaceTexture surfaceTexture = textureView.getSurfaceTexture();
-            surfaceTexture.setDefaultBufferSize(previewSize.getWidth(), previewSize.getHeight());
+            //surfaceTexture.setDefaultBufferSize(previewSize.getWidth(), previewSize.getHeight());
             Surface previewSurface = new Surface(surfaceTexture);
             captureRequestBuilder = cameraDevice.createCaptureRequest(CameraDevice.TEMPLATE_PREVIEW);
             captureRequestBuilder.addTarget(previewSurface);
@@ -155,18 +154,6 @@ public class Camera extends AppCompatActivity {
                     }, backgroundHandler);
         } catch (CameraAccessException e) {
             e.printStackTrace();
-        }
-    }
-
-    private void createImageGallery() {
-        File storageDirectory = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES);
-        galleryFolder = new File(storageDirectory, "Screen.jpg");
-        galleryFolder2 = new File(storageDirectory, "Screen2.jpg");
-        if (!galleryFolder.exists()) {
-            boolean wasCreated = galleryFolder.mkdirs();
-            if (!wasCreated) {
-                Log.e("CapturedImages", "Failed to create directory");
-            }
         }
     }
 
@@ -328,14 +315,14 @@ public class Camera extends AppCompatActivity {
                 public void run() {
                     bitmap = textureView.getBitmap();
                 }
-            }, t - (System.currentTimeMillis() + (int)Sync.deltaT));
+            }, t - (System.currentTimeMillis() + (int) Sync.deltaT));
             timer.schedule(new TimerTask() {
                 @Override
                 public void run() {
                     bitmap2 = textureView.getBitmap();
                     new CordThread().start();
                 }
-            }, t - (System.currentTimeMillis() + (int)Sync.deltaT) + 45);
+            }, t - (System.currentTimeMillis() + (int) Sync.deltaT) + 45);
             /*try {
                 Thread.sleep(10);
             } catch (InterruptedException e) {
@@ -378,21 +365,25 @@ public class Camera extends AppCompatActivity {
             } catch (IOException e) {
                 e.printStackTrace();
             }
-            Call<Void> call = service.putDevice(android_id, room, t);
+            Call<Void> call = service.putDevice(android_id, /*room*/0, t);
             try {
                 call.execute();
                 Log.d("SEND_AND_RETURN", "" + (t - (System.currentTimeMillis() + (int) Sync.deltaT)));
             } catch (IOException e) {
                 e.printStackTrace();
             }
-            Call<Void> videoCall = service.putVideo(video, room);
+
+            String send = new String(video);
+            Call<Void> videoCall = service.putVideo(send, room);
             try {
                 videoCall.execute();
-            } catch (IOException e) {
+            } catch (Exception e) {
                 e.printStackTrace();
             }
         }
     }
+
+
 
     class CordThread extends Thread {
 
@@ -400,22 +391,18 @@ public class Camera extends AppCompatActivity {
         public void run() {
             int orientation = Camera.this.getResources().getConfiguration().orientation;
             Matrix matrix = new Matrix();
-            if (orientation == Configuration.ORIENTATION_LANDSCAPE) {
-                matrix.postRotate(-90);
-            }
+            matrix.postRotate(-90);
             bitmap = Bitmap.createBitmap(bitmap, 0, 0, bitmap.getWidth(), bitmap.getHeight(), matrix, true);
-            bitmap = Bitmap.createScaledBitmap(bitmap, xs, ys, false);
+//            bitmap = Bitmap.createScaledBitmap(bitmap, xs, ys, false);
             bitmap2 = bitmap2.copy(Bitmap.Config.ARGB_8888, true);
-            matrix = new Matrix();
-            if (orientation == Configuration.ORIENTATION_LANDSCAPE) {
-                matrix.postRotate(-90);
-            }
             bitmap2 = Bitmap.createBitmap(bitmap2, 0, 0, bitmap2.getWidth(), bitmap2.getHeight(), matrix, true);
-            bitmap2 = Bitmap.createScaledBitmap(bitmap2, xs, ys, false);
+//            bitmap2 = Bitmap.createScaledBitmap(bitmap2, xs, ys, false);
+
+            Bitmap bitmap3 = Bitmap.createBitmap(bitmap.getWidth(), bitmap.getHeight(), Bitmap.Config.ARGB_8888);
+            bitmap3 = bitmap3.copy(Bitmap.Config.ARGB_8888, true);
 
 
             LinkedList<Point> linkedList = new LinkedList<>();
-            LinkedList<Point> linkedList2 = new LinkedList<>();
             for (int i = 0; i < bitmap.getHeight(); i++) {
                 for (int j = 0; j < bitmap.getWidth(); j++) {
                     if (bitmap.getPixel(j, i) != bitmap2.getPixel(j, i)) {
@@ -427,46 +414,59 @@ public class Camera extends AppCompatActivity {
                         float[] hsv3 = new float[3];
                         Color.RGBToHSV(Color.red(need2), Color.green(need2), Color.blue(need2), hsv3);
                         if (Math.abs(hsv[0] - hsv3[0]) <= 16 && Math.abs(hsv[1] - hsv3[1]) <= 0.35 && Math.abs(hsv[2] - hsv3[2]) <= 0.35) {
-                            bitmap2.setPixel(j, i, Color.GREEN);
-                            linkedList.add(new Point(i, j));
+                            bitmap3.setPixel(j, i, Color.GREEN);
+                            linkedList.add(new Point(j, i));
                         }
 
                         int need = 0xff00ff00;
                         float[] hsv2 = new float[3];
                         Color.RGBToHSV(Color.red(need), Color.green(need), Color.blue(need), hsv2);
                         if (Math.abs(hsv[0] - hsv2[0]) <= 25 && Math.abs(hsv[1] - hsv2[1]) <= 0.60 && Math.abs(hsv[2] - hsv2[2]) <= 0.60) {
-                                linkedList2.add(new Point(i, j));
-                                bitmap2.setPixel(j, i, Color.RED);
+                            linkedList.add(new Point(j, i));
+                            bitmap3.setPixel(j, i, Color.RED);
                         }
                     }
                 }
             }
 
-            //Point b1 = linkedList.get(0), b2 = linkedList.getLast();
-            Point g1 = linkedList2.get(0), g2 = linkedList2.getLast();
-            TreeMap<Integer, LinkedList<Integer>> treeMap = new TreeMap<>();
+            Comparator<Point> xComparator = new Comparator<Point>() {
+                @Override
+                public int compare(Point o1, Point o2) {
+                    return o1.x - o2.x;
+                }
+            };
+
             if (linkedList.size() > 0) {
-                for (Point i : linkedList) {
-                    if (treeMap.containsKey(i.x)) {
-                        treeMap.get(i.x).add(i.y);
-                    } else {
-                        treeMap.put(i.x, new LinkedList<Integer>());
-                        treeMap.get(i.x).add(i.y);
+                Comparator<Point> yComparator = new Comparator<Point>() {
+                    @Override
+                    public int compare(Point o1, Point o2) {
+                        return o1.y - o2.y;
                     }
+                };
+                Collections.sort(linkedList, xComparator);
+                int left = linkedList.getFirst().x, right = linkedList.getLast().x;
+                Collections.sort(linkedList, xComparator);
+                int up = linkedList.getFirst().y, down = linkedList.getLast().y;
+
+                Bitmap bitmap4 = Bitmap.createBitmap(bitmap.getWidth(), bitmap.getHeight(), Bitmap.Config.ARGB_8888);
+                bitmap4 = bitmap4.copy(Bitmap.Config.ARGB_8888, true);
+
+                bitmap4.setPixel(left, up, Color.RED);
+                bitmap4.setPixel(left, down, Color.RED);
+                bitmap4.setPixel(right, up, Color.RED);
+                bitmap4.setPixel(right, down, Color.RED);
+
+                for (int i = left; i < right; i++) {
+                    bitmap4.setPixel(i, up, Color.RED);
+                    bitmap4.setPixel(i, down, Color.RED);
                 }
-                int j = 0, a = 0;
-                for (int i : treeMap.keySet()) {
-                    a += treeMap.get(i).size();
-                    j++;
+
+                for (int i = up; i < down; i++) {
+                    bitmap4.setPixel(left, i, Color.RED);
+                    bitmap4.setPixel(right, i, Color.RED);
                 }
-                Iterator it = treeMap.entrySet().iterator();
-                while (it.hasNext()) {
-                    Map.Entry<Integer, LinkedList<Integer>> item = (Map.Entry<Integer, LinkedList<Integer>>) it.next();
-                    if (item.getValue().size() != a / j)
-                        it.remove();
-                }
-//                Log.e("PHOTO", Collections.min(treeMap.keySet()) + ";" + treeMap.get(Collections.min(treeMap.keySet())).get(0)
-//                        + " " + Collections.max(treeMap.keySet()) + ";" + treeMap.get(Collections.max(treeMap.keySet())).get(0));
+
+                Log.e("Coords", left + ";" + up + " " + right + ";" + down);
             }
         }
     }

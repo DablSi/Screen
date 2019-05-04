@@ -1,12 +1,15 @@
 package com.example.ducks.screen;
 
+import android.Manifest;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.graphics.Point;
 import android.net.Uri;
 import android.os.*;
 import android.provider.MediaStore;
 import android.support.annotation.RequiresApi;
+import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.Menu;
@@ -58,8 +61,13 @@ public class MainActivity extends AppCompatActivity {
                 if (selectedImagePath != null) {
                     Log.e("FILE", selectedImagePath);
                     Video.path = selectedImagePath;
+                    if (PackageManager.PERMISSION_GRANTED != ActivityCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE)) {
+                        ActivityCompat.requestPermissions(this,
+                                new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE, Manifest.permission.READ_EXTERNAL_STORAGE},
+                                1);
+                    }
+                    video = new byte[(int) new File(selectedImagePath).length()];
                     try {
-                        video = new byte[(int) new File(selectedImagePath).length()];
                         new FileInputStream(new File(selectedImagePath)).read(video);
                     } catch (IOException e) {
                         e.printStackTrace();
@@ -71,7 +79,7 @@ public class MainActivity extends AppCompatActivity {
 
     private String getPath(Uri uri) {
         if ("content".equalsIgnoreCase(uri.getScheme())) {
-            //!!! какая та страннность MediaStore.Video.Media.DATA на новом телефоне возвращает null
+            //!!! какая-то странность MediaStore.Video.Media.DATA на новом телефоне возвращает null
             String[] projection = {MediaStore.Video.Media.DISPLAY_NAME};
             Cursor cursor = getContentResolver().query(uri, projection, null, null, null);
             if (cursor != null) {
@@ -112,8 +120,7 @@ public class MainActivity extends AppCompatActivity {
                 String[] choose = getResources().getStringArray(R.array.spinner_list_item_array);
                 if (choose[selectedItemPosition].equals("Файл")) {
                     showFileChooser();
-                }
-                else if(choose[selectedItemPosition].equals("Фото")){
+                } else if (choose[selectedItemPosition].equals("Фото")) {
                     startActivity(new Intent(MainActivity.this, Camera.class));
                 }
             }
@@ -153,7 +160,7 @@ public class MainActivity extends AppCompatActivity {
                     SimpleDateFormat formatter = new SimpleDateFormat("dd.MM.yyyy-", Locale.getDefault());
                     Date date = new Date();
                     Date runIn = new SimpleDateFormat("dd.MM.yyyy-HH:mm", Locale.getDefault()).parse(formatter.format(date) + i + ":" + i1);
-                    long dif = runIn.getTime() - (System.currentTimeMillis() + (int)Sync.deltaT);
+                    long dif = runIn.getTime() - (System.currentTimeMillis() + (int) Sync.deltaT);
                     if (dif <= 0) {
                         Toast.makeText(getApplicationContext(), getString(R.string.time_less), Toast.LENGTH_SHORT).show();
                     } else {
@@ -190,7 +197,7 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onResume() {
         super.onResume();
-        if(spinner != null && adapter != null){
+        if (spinner != null && adapter != null) {
             spinner.setAdapter(adapter);
         }
     }
@@ -220,7 +227,7 @@ public class MainActivity extends AppCompatActivity {
         public void run() {
             if (isPressed) {
                 //if (!isStarted)
-                    Video.mMediaPlayer.start();
+                Video.mMediaPlayer.start();
                 isStarted = true;
             }
         }
@@ -231,7 +238,7 @@ public class MainActivity extends AppCompatActivity {
 
         @Override
         protected Void doInBackground(Void... voids) {
-            if(!Sync.isStarted)
+            if (!Sync.isStarted)
                 startService(new Intent(MainActivity.this, Sync.class));
             //startService(new Intent(MainActivity.this, Autorun.class));
             return null;
