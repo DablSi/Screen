@@ -444,58 +444,89 @@ public class Camera extends AppCompatActivity {
                 }
             };
 
+            int left1 = 0, left2 = 0, right1 = 0, right2 = 0, up1 = 0, up2 = 0, down1 = 0, down2 = 0;
+            Point size = new Point(bitmap.getWidth(), bitmap.getHeight());
+
             if (linkedList.size() > 0) {
                 Collections.sort(linkedList, xComparator);
-                int left = linkedList.getFirst().x, right = linkedList.getLast().x;
+                left1 = linkedList.getFirst().x;
+                right1 = linkedList.getLast().x;
                 Collections.sort(linkedList, yComparator);
-                int up = linkedList.getFirst().y, down = linkedList.getLast().y;
+                up1 = linkedList.getFirst().y;
+                down1 = linkedList.getLast().y;
 
                 Bitmap bitmap4 = Bitmap.createBitmap(bitmap.getWidth(), bitmap.getHeight(), Bitmap.Config.ARGB_8888);
                 bitmap4 = bitmap4.copy(Bitmap.Config.ARGB_8888, true);
 
-                bitmap4.setPixel(left, up, Color.RED);
-                bitmap4.setPixel(left, down, Color.RED);
-                bitmap4.setPixel(right, up, Color.RED);
-                bitmap4.setPixel(right, down, Color.RED);
+                bitmap4.setPixel(left1, up1, Color.RED);
+                bitmap4.setPixel(left1, down1, Color.RED);
+                bitmap4.setPixel(right1, up1, Color.RED);
+                bitmap4.setPixel(right1, down1, Color.RED);
 
-                for (int i = left; i < right; i++) {
-                    bitmap4.setPixel(i, up, Color.RED);
-                    bitmap4.setPixel(i, down, Color.RED);
+                for (int i = left1; i < right1; i++) {
+                    bitmap4.setPixel(i, up1, Color.RED);
+                    bitmap4.setPixel(i, down1, Color.RED);
                 }
 
-                for (int i = up; i < down; i++) {
-                    bitmap4.setPixel(left, i, Color.RED);
-                    bitmap4.setPixel(right, i, Color.RED);
+                for (int i = up1; i < down1; i++) {
+                    bitmap4.setPixel(left1, i, Color.RED);
+                    bitmap4.setPixel(right1, i, Color.RED);
                 }
 
-                Log.e("Coords", left + ";" + up + " " + right + ";" + down);
+                Log.e("Coords", left1 + ";" + up1 + " " + right1 + ";" + down1);
             }
             if (linkedList2.size() > 0) {
                 Collections.sort(linkedList2, xComparator);
-                int left = linkedList2.getFirst().x, right = linkedList2.getLast().x;
+                left2 = linkedList2.getFirst().x;
+                right2 = linkedList2.getLast().x;
                 Collections.sort(linkedList2, yComparator);
-                int up = linkedList2.getFirst().y, down = linkedList2.getLast().y;
+                up2 = linkedList2.getFirst().y;
+                down2 = linkedList2.getLast().y;
 
                 Bitmap bitmap4 = Bitmap.createBitmap(bitmap.getWidth(), bitmap.getHeight(), Bitmap.Config.ARGB_8888);
                 bitmap4 = bitmap4.copy(Bitmap.Config.ARGB_8888, true);
 
-                bitmap4.setPixel(left, up, Color.GREEN);
-                bitmap4.setPixel(left, down, Color.GREEN);
-                bitmap4.setPixel(right, up, Color.GREEN);
-                bitmap4.setPixel(right, down, Color.GREEN);
+                bitmap4.setPixel(left2, up2, Color.GREEN);
+                bitmap4.setPixel(left2, down2, Color.GREEN);
+                bitmap4.setPixel(right2, up2, Color.GREEN);
+                bitmap4.setPixel(right2, down2, Color.GREEN);
 
-                for (int i = left; i < right; i++) {
-                    bitmap4.setPixel(i, up, Color.GREEN);
-                    bitmap4.setPixel(i, down, Color.GREEN);
+                for (int i = left2; i < right2; i++) {
+                    bitmap4.setPixel(i, up2, Color.GREEN);
+                    bitmap4.setPixel(i, down2, Color.GREEN);
                 }
 
-                for (int i = up; i < down; i++) {
-                    bitmap4.setPixel(left, i, Color.GREEN);
-                    bitmap4.setPixel(right, i, Color.GREEN);
+                for (int i = up2; i < down2; i++) {
+                    bitmap4.setPixel(left2, i, Color.GREEN);
+                    bitmap4.setPixel(right2, i, Color.GREEN);
                 }
 
-                Log.e("Coords2", left + ";" + up + " " + right + ";" + down);
+                Log.e("Coords2", left2 + ";" + up2 + " " + right2 + ";" + down2);
             }
+
+            if (up1 <= up2) {
+                up2 -= up1;
+                down1 -= up1;
+                down2 -= up1;
+                size.y -= up1;
+                up1 = 0;
+                left2 -= left1;
+                right1 -= left1;
+                right2 -= left1;
+                size.x -= left1;
+                left1 = 0;
+            }
+
+            left1 /= (size.x / 100);
+            up1 /= (size.y / 100);
+            right1 /= (size.x / 100);
+            down1 /= (size.y / 100);
+            left2 /= (size.x / 100);
+            up2 /= (size.y / 100);
+            right2 /= (size.x / 100);
+            down2 /= (size.y / 100);
+            Log.e("Coords", left1 + ";" + up1 + " " + right1 + ";" + down1);
+            Log.e("Coords2", left2 + ";" + up2 + " " + right2 + ";" + down2);
         }
 
     }
