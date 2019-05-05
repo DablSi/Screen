@@ -29,7 +29,7 @@ import java.util.concurrent.ExecutionException;
 public class Search extends AppCompatActivity {
     LinearLayout linearLayout;
     boolean isClicked = false, isTrue = true;
-    public static String URL = "http://192.168.1.8:8080/";
+    public static String URL = "http://192.168.1.6:8080/";
     private String android_id;
     private int color = 0x0ff000000;
 
