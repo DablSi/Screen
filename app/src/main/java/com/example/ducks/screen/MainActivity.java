@@ -16,6 +16,8 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.*;
+import retrofit2.Call;
+import retrofit2.Response;
 import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
 
@@ -29,15 +31,19 @@ import java.util.Locale;
 import java.util.Timer;
 import java.util.TimerTask;
 
+import static com.example.ducks.screen.Search.URL;
+
 
 public class MainActivity extends AppCompatActivity {
 
     public RelativeLayout relativeLayout;
     TimePicker timePicker;
     TextView textView;
+    private TextView textView1;
     static boolean isStarted = false;
     private boolean isPressed = false;
     int i = 1;
+    public static int room = -1;
     private EditText et1, et2, et3, et4;
     private Spinner spinner;
     private Timer timer;
@@ -74,6 +80,20 @@ public class MainActivity extends AppCompatActivity {
                     }
                 }
             }
+        }
+
+        Retrofit retrofit = new Retrofit.Builder()
+                .baseUrl(URL)
+                .addConverterFactory(GsonConverterFactory.create())
+                .build();
+        Service service = retrofit.create(Service.class);
+        Call<Integer> integerCall = service.getRoom();
+        try {
+            Response<Integer> integerResponse = integerCall.execute();
+            room = integerResponse.body();
+            textView1.setText(getString(R.string.roomNum) + room);
+        } catch (IOException e) {
+            e.printStackTrace();
         }
     }
 
@@ -146,8 +166,8 @@ public class MainActivity extends AppCompatActivity {
         textView = findViewById(R.id.textView);
         Point size = new Point();
         getWindowManager().getDefaultDisplay().getSize(size);
-        /*textView1 = findViewById(R.id.textView1);
-        textView1.setText("Размер экрана:" + size.x + "*" + size.y);*/
+        textView1 = findViewById(R.id.textView1);
+        //textView1.setText("Размер экрана:" + size.x + "*" + size.y);
 
         ChangeText changeText = new ChangeText(Integer.MAX_VALUE, 1000);
         changeText.start();
@@ -213,7 +233,7 @@ public class MainActivity extends AppCompatActivity {
             //!!!
             SimpleDateFormat output = new SimpleDateFormat("HH:mm:ss");
             //!!!
-            textView.setText("Server Time:" + output.format(new Date((int) Sync.deltaT + System.currentTimeMillis())) /*+ " delta:" + Sync.deltaT*/);
+            textView.setText("Время:" + output.format(new Date((int) Sync.deltaT + System.currentTimeMillis())) /*+ " delta:" + Sync.deltaT*/);
         }
 
         @Override

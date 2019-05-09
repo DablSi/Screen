@@ -5,4 +5,7 @@
     <string name="time_less">Время меньше серверного!</string>
     <string name="time_more">Видео запустится через</string>
     <string name="mls">миллисекунд</string>
+
+    <string name="room">Введите номер комнаты:</string>
+    <string name="roomNum">Номер комнаты: </string>
 </resources>

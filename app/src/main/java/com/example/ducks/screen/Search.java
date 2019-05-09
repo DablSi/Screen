@@ -1,17 +1,17 @@
 package com.example.ducks.screen;
 
+import android.app.Fragment;
+import android.app.FragmentTransaction;
 import android.graphics.Color;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.provider.Settings;
+import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
-import android.widget.Button;
-import android.widget.LinearLayout;
-import android.widget.RelativeLayout;
-import android.widget.TextView;
+import android.widget.*;
 import retrofit2.Call;
 import retrofit2.Response;
 import retrofit2.Retrofit;
@@ -27,11 +27,14 @@ import java.util.TimerTask;
 import java.util.concurrent.ExecutionException;
 
 public class Search extends AppCompatActivity {
-    LinearLayout linearLayout;
+    RelativeLayout relativeLayout;
     boolean isClicked = false, isTrue = true;
     public static String URL = "http://192.168.1.6:8080/";
     private String android_id;
     private int color = 0x0ff000000;
+    public static Integer room;
+    private FragmentTransaction transaction;
+    private Fragment newFragment;
 
     private void hideSystemUI() {
         // Enables regular immersive mode.
@@ -52,15 +55,42 @@ public class Search extends AppCompatActivity {
         }
     }
 
+    private void showSystemUI() {
+        View decorView = getWindow().getDecorView();
+        decorView.setSystemUiVisibility(
+                View.SYSTEM_UI_FLAG_LAYOUT_STABLE
+                        | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
+                        | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN);
+    }
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_search);
         hideSystemUI();
+
+        EditText editText = findViewById(R.id.editText);
+        relativeLayout = findViewById(R.id.ll);
+        TextView textView = findViewById(R.id.textView);
         android_id = android.provider.Settings.Secure.getString(this.getContentResolver(),
                 Settings.Secure.ANDROID_ID);
-        SendThread sendThread = new SendThread();
-        sendThread.start();
+
+        FloatingActionButton floatingActionButton = (FloatingActionButton) findViewById(R.id.floatingActionButton);
+        floatingActionButton.bringToFront();
+        floatingActionButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (!editText.getText().toString().equals("")) {
+                    Search.room = Integer.parseInt(editText.getText().toString());
+                    relativeLayout.setBackgroundColor(color);
+                    relativeLayout.removeView(editText);
+                    relativeLayout.removeView(floatingActionButton);
+                    relativeLayout.removeView(textView);
+                    SendThread sendThread = new SendThread();
+                    sendThread.start();
+                }
+            }
+        });
     }
 
     class SendThread extends Thread {
@@ -72,7 +102,7 @@ public class Search extends AppCompatActivity {
                     .addConverterFactory(GsonConverterFactory.create())
                     .build();
             Service service = retrofit.create(Service.class);
-            Call<Void> call = service.putDevice(android_id, 0, null /*System.currentTimeMillis() + (int)Sync.deltaT + 10000*/);
+            Call<Void> call = service.putDevice(android_id, room, null);
             try {
                 call.execute();
                 Log.d("SEND_AND_RETURN", "Ready.");
@@ -118,13 +148,18 @@ public class Search extends AppCompatActivity {
             timer.schedule(new TimerTask() {
                 @Override
                 public void run() {
-                    linearLayout = findViewById(R.id.ll);
                     runOnUiThread(new Runnable() {
                         @Override
                         public void run() {
-                            linearLayout.setBackgroundColor(color);
+                            relativeLayout.setBackgroundColor(color);
                         }
                     });
+                    try {
+                        Thread.sleep(100);
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                    showSystemUI();
                 }
             }, time - (System.currentTimeMillis() + (int) Sync.deltaT) - 110);
         }

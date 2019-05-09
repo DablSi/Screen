@@ -27,6 +27,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.util.*;
 import android.view.*;
 import android.widget.Button;
+import android.widget.Toast;
 import retrofit2.Call;
 import retrofit2.Response;
 import retrofit2.Retrofit;
@@ -62,6 +63,25 @@ public class Camera extends AppCompatActivity {
     private String android_id;
     private long t;
     private int xs = 640, ys = 360;
+
+    private void hideSystemUI() {
+        // Enables regular immersive mode.
+        // For "lean back" mode, remove SYSTEM_UI_FLAG_IMMERSIVE.
+        // Or for "sticky immersive," replace it with SYSTEM_UI_FLAG_IMMERSIVE_STICKY
+        View decorView = getWindow().getDecorView();
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
+            decorView.setSystemUiVisibility(
+                    View.SYSTEM_UI_FLAG_IMMERSIVE
+                            // Set the content to appear under the system bars so that the
+                            // content doesn't resize when the system bars hide and show.
+                            | View.SYSTEM_UI_FLAG_LAYOUT_STABLE
+                            | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
+                            | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
+                            // Hide the nav bar and status bar
+                            | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
+                            | View.SYSTEM_UI_FLAG_FULLSCREEN);
+        }
+    }
 
     private Size chooseOptimalSize(Size[] outputSizes, int width, int height) {
         double preferredRatio = height / (double) width;
@@ -179,6 +199,11 @@ public class Camera extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_camera);
+        hideSystemUI();
+        if(MainActivity.room < 0){
+            Toast.makeText(Camera.this, "Прежде выбирете файл!", Toast.LENGTH_LONG).show();
+            finish();
+        }
         textureView = findViewById(R.id.texture_view);
         ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.CAMERA}, CAMERA_REQUEST_CODE);
 
@@ -357,15 +382,8 @@ public class Camera extends AppCompatActivity {
                     .addConverterFactory(GsonConverterFactory.create())
                     .build();
             Service service = retrofit.create(Service.class);
-            Call<Integer> integerCall = service.getRoom();
-            int room = 1;
-            try {
-                Response<Integer> integerResponse = integerCall.execute();
-                room = integerResponse.body();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-            Call<Void> call = service.putDevice(android_id, /*room*/0, t);
+
+            Call<Void> call = service.putDevice(android_id, MainActivity.room, t);
             try {
                 call.execute();
                 Log.d("SEND_AND_RETURN", "" + (t - (System.currentTimeMillis() + (int) Sync.deltaT)));
@@ -375,7 +393,7 @@ public class Camera extends AppCompatActivity {
 
             if (video != null) {
                 String send = new String(video);
-                Call<Void> videoCall = service.putVideo(send, room);
+                Call<Void> videoCall = service.putVideo(send, MainActivity.room);
                 try {
                     videoCall.execute();
                 } catch (Exception e) {
