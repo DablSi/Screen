@@ -29,7 +29,7 @@ import java.util.concurrent.ExecutionException;
 public class Search extends AppCompatActivity {
     RelativeLayout relativeLayout;
     boolean isClicked = false, isTrue = true;
-    public static String URL = "http://192.168.1.6:8080/";
+    public static String URL = "http://192.168.1.5:8080/";
     private String android_id;
     private int color = 0x0ff000000;
     public static Integer room;
@@ -155,11 +155,25 @@ public class Search extends AppCompatActivity {
                         }
                     });
                     try {
-                        Thread.sleep(100);
+                        Thread.sleep(1000);
                     } catch (InterruptedException e) {
                         e.printStackTrace();
                     }
-                    showSystemUI();
+                    Service.Coords coords = null;
+                    try {
+                        while (coords == null) {
+                            Call<Service.Coords> call = service.getCoords(android_id);
+                            Response<Service.Coords> response = call.execute();
+                            coords = response.body();
+                        }
+                        Video.ax = coords.x1;
+                        Video.bx = coords.x2;
+                        Video.ay = coords.y1;
+                        Video.by = coords.y2;
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                    finish();
                 }
             }, time - (System.currentTimeMillis() + (int) Sync.deltaT) - 110);
         }

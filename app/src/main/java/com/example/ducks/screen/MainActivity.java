@@ -8,6 +8,7 @@ import android.graphics.Point;
 import android.net.Uri;
 import android.os.*;
 import android.provider.MediaStore;
+import android.provider.Settings;
 import android.support.annotation.RequiresApi;
 import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
@@ -50,8 +51,14 @@ public class MainActivity extends AppCompatActivity {
     private ArrayAdapter<CharSequence> adapter;
     private static final int REQUEST_TAKE_GALLERY_VIDEO = 0;
     public static byte[] video;
+    protected static String android_id;
 
     private void showFileChooser() {
+        if (PackageManager.PERMISSION_GRANTED != ActivityCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE)) {
+            ActivityCompat.requestPermissions(this,
+                    new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE, Manifest.permission.READ_EXTERNAL_STORAGE},
+                    1);
+        }
         Intent intent = new Intent();
         intent.setType("video/*");
         intent.setAction(Intent.ACTION_GET_CONTENT);
@@ -67,11 +74,6 @@ public class MainActivity extends AppCompatActivity {
                 if (selectedImagePath != null) {
                     Log.e("FILE", selectedImagePath);
                     Video.path = selectedImagePath;
-                    if (PackageManager.PERMISSION_GRANTED != ActivityCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE)) {
-                        ActivityCompat.requestPermissions(this,
-                                new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE, Manifest.permission.READ_EXTERNAL_STORAGE},
-                                1);
-                    }
                     video = new byte[(int) new File(selectedImagePath).length()];
                     try {
                         new FileInputStream(new File(selectedImagePath)).read(video);
@@ -82,24 +84,39 @@ public class MainActivity extends AppCompatActivity {
             }
         }
 
-        Retrofit retrofit = new Retrofit.Builder()
-                .baseUrl(URL)
-                .addConverterFactory(GsonConverterFactory.create())
-                .build();
-        Service service = retrofit.create(Service.class);
-        Call<Integer> integerCall = service.getRoom();
-        try {
-            Response<Integer> integerResponse = integerCall.execute();
-            room = integerResponse.body();
-            textView1.setText(getString(R.string.roomNum) + room);
-        } catch (IOException e) {
-            e.printStackTrace();
+        RoomAsync roomAsync = new RoomAsync();
+        roomAsync.start();
+    }
+
+    class RoomAsync extends Thread {
+
+        @Override
+        public void run() {
+            Retrofit retrofit = new Retrofit.Builder()
+                    .baseUrl(URL)
+                    .addConverterFactory(GsonConverterFactory.create())
+                    .build();
+            Service service = retrofit.create(Service.class);
+            Call<Integer> integerCall = service.getRoom();
+            try {
+                Response<Integer> integerResponse = integerCall.execute();
+                room = integerResponse.body();
+                Call<Void> call = service.putDevice(android_id, MainActivity.room, null);
+                call.execute();
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        textView1.setText(getString(R.string.roomNum) + room);
+                    }
+                });
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
         }
     }
 
     private String getPath(Uri uri) {
         if ("content".equalsIgnoreCase(uri.getScheme())) {
-            //!!! какая-то странность MediaStore.Video.Media.DATA на новом телефоне возвращает null
             String[] projection = {MediaStore.Video.Media.DISPLAY_NAME};
             Cursor cursor = getContentResolver().query(uri, projection, null, null, null);
             if (cursor != null) {
@@ -155,6 +172,9 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        android_id = android.provider.Settings.Secure.getString(this.getContentResolver(),
+                Settings.Secure.ANDROID_ID);
+        textView1 = findViewById(R.id.textView1);
         NewThread newThread = new NewThread();
         newThread.execute();
         et1 = findViewById(R.id.edit1);
@@ -166,7 +186,6 @@ public class MainActivity extends AppCompatActivity {
         textView = findViewById(R.id.textView);
         Point size = new Point();
         getWindowManager().getDefaultDisplay().getSize(size);
-        textView1 = findViewById(R.id.textView1);
         //textView1.setText("Размер экрана:" + size.x + "*" + size.y);
 
         ChangeText changeText = new ChangeText(Integer.MAX_VALUE, 1000);

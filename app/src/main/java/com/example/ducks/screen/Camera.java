@@ -39,7 +39,9 @@ import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.concurrent.ExecutionException;
 
+import static com.example.ducks.screen.MainActivity.android_id;
 import static com.example.ducks.screen.MainActivity.video;
+import static com.example.ducks.screen.Search.URL;
 
 @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
 public class Camera extends AppCompatActivity {
@@ -59,8 +61,6 @@ public class Camera extends AppCompatActivity {
     private ImageReader mImageReader;
     private Bitmap bitmap, bitmap2;
     private Size previewSize;
-    private static String URL = "http://192.168.1.6:8080/";
-    private String android_id;
     private long t;
     private int xs = 640, ys = 360;
 
@@ -206,9 +206,6 @@ public class Camera extends AppCompatActivity {
         }
         textureView = findViewById(R.id.texture_view);
         ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.CAMERA}, CAMERA_REQUEST_CODE);
-
-        android_id = android.provider.Settings.Secure.getString(this.getContentResolver(),
-                Settings.Secure.ANDROID_ID);
         cameraManager = (CameraManager) getSystemService(Context.CAMERA_SERVICE);
         cameraFacing = CameraCharacteristics.LENS_FACING_BACK;
 
@@ -545,6 +542,20 @@ public class Camera extends AppCompatActivity {
             down2 /= (size.y / 100);
             Log.e("Coords", left1 + ";" + up1 + " " + right1 + ";" + down1);
             Log.e("Coords2", left2 + ";" + up2 + " " + right2 + ";" + down2);
+            Retrofit retrofit = new Retrofit.Builder()
+                    .baseUrl(URL)
+                    .addConverterFactory(GsonConverterFactory.create())
+                    .build();
+            Service service = retrofit.create(Service.class);
+
+            Call<Void> call = service.putCoords(MainActivity.room, left1, up1, right1, down1, 0xff00ff00);
+            Call<Void> call2 = service.putCoords(MainActivity.room, left2, up2, right2, down2, 0xff303f9f);
+            try {
+                call.execute();
+                call2.execute();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
         }
 
     }
