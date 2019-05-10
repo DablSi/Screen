@@ -55,25 +55,18 @@ public class Search extends AppCompatActivity {
         }
     }
 
-    private void showSystemUI() {
-        View decorView = getWindow().getDecorView();
-        decorView.setSystemUiVisibility(
-                View.SYSTEM_UI_FLAG_LAYOUT_STABLE
-                        | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
-                        | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN);
-    }
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_search);
-        hideSystemUI();
 
         EditText editText = findViewById(R.id.editText);
         relativeLayout = findViewById(R.id.ll);
         TextView textView = findViewById(R.id.textView);
         android_id = android.provider.Settings.Secure.getString(this.getContentResolver(),
                 Settings.Secure.ANDROID_ID);
+
+        hideSystemUI();
 
         FloatingActionButton floatingActionButton = (FloatingActionButton) findViewById(R.id.floatingActionButton);
         floatingActionButton.bringToFront();
@@ -173,7 +166,6 @@ public class Search extends AppCompatActivity {
                     } catch (IOException e) {
                         e.printStackTrace();
                     }
-                    finish();
                 }
             }, time - (System.currentTimeMillis() + (int) Sync.deltaT) - 110);
         }

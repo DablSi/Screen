@@ -99,10 +99,10 @@ public class MainActivity extends AppCompatActivity {
             Service service = retrofit.create(Service.class);
             Call<Integer> integerCall = service.getRoom();
             try {
-                Response<Integer> integerResponse = integerCall.execute();
-                room = integerResponse.body();
                 Call<Void> call = service.putDevice(android_id, MainActivity.room, null);
                 call.execute();
+                Response<Integer> integerResponse = integerCall.execute();
+                room = integerResponse.body();
                 runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
