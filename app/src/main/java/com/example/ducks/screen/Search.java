@@ -154,7 +154,7 @@ public class Search extends AppCompatActivity {
                     }
                     Service.Coords coords = null;
                     try {
-                        while (coords == null) {
+                        while (coords == null || coords.y2 == -1) {
                             Call<Service.Coords> call = service.getCoords(android_id);
                             Response<Service.Coords> response = call.execute();
                             coords = response.body();
@@ -163,6 +163,7 @@ public class Search extends AppCompatActivity {
                         Video.bx = coords.x2;
                         Video.ay = coords.y1;
                         Video.by = coords.y2;
+                        finish();
                     } catch (IOException e) {
                         e.printStackTrace();
                     }

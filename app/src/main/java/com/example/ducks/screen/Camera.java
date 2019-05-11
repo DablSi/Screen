@@ -525,11 +525,27 @@ public class Camera extends AppCompatActivity {
                 down2 -= up1;
                 size.y -= up1;
                 up1 = 0;
+            }
+            else{
+                up1 -= up2;
+                down2 -= up2;
+                down1 -= up2;
+                size.y -= up2;
+                up2 = 0;
+            }
+            if (left1 <= left2){
                 left2 -= left1;
                 right1 -= left1;
                 right2 -= left1;
                 size.x -= left1;
                 left1 = 0;
+            }
+            else {
+                left1 -= left2;
+                right2 -= left2;
+                right1 -= left2;
+                size.x -= left2;
+                left2 = 0;
             }
 
             left1 /= (size.x / 100);
