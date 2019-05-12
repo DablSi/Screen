@@ -13,6 +13,7 @@ import android.content.res.Resources;
 import android.content.res.TypedArray;
 import android.graphics.*;
 import android.graphics.drawable.Drawable;
+import android.graphics.drawable.GradientDrawable;
 import android.hardware.camera2.*;
 import android.hardware.camera2.params.StreamConfigurationMap;
 import android.media.ExifInterface;
@@ -62,7 +63,10 @@ public class Camera extends AppCompatActivity {
     private Bitmap bitmap, bitmap2;
     private Size previewSize;
     private long t;
+    private OrientationListener orientationListener;
+    private int rotate;
     private int xs = 640, ys = 360;
+    private FloatingActionButton floatingActionButton;
 
     private void hideSystemUI() {
         // Enables regular immersive mode.
@@ -200,7 +204,9 @@ public class Camera extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_camera);
         hideSystemUI();
-        if(MainActivity.room < 0){
+        orientationListener = new OrientationListener(Camera.this);
+        floatingActionButton = findViewById(R.id.floatingActionButton);
+        if (MainActivity.room < 0) {
             Toast.makeText(Camera.this, "Прежде выбирете файл!", Toast.LENGTH_LONG).show();
             finish();
         }
@@ -257,6 +263,12 @@ public class Camera extends AppCompatActivity {
     }
 
     @Override
+    protected void onStart() {
+        orientationListener.enable();
+        super.onStart();
+    }
+
+    @Override
     protected void onResume() {
         super.onResume();
         openBackgroundThread();
@@ -264,7 +276,6 @@ public class Camera extends AppCompatActivity {
 
         if (textureView.isAvailable()) {
             setUpCamera();
-            //transformImage(textureView.getWidth(), textureView.getHeight());
             openCamera();
         } else {
             textureView.setSurfaceTextureListener(surfaceTextureListener);
@@ -277,6 +288,7 @@ public class Camera extends AppCompatActivity {
         setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_FULL_SENSOR);
         closeCamera();
         closeBackgroundThread();
+        orientationListener.disable();
     }
 
     private void closeCamera() {
@@ -407,7 +419,7 @@ public class Camera extends AppCompatActivity {
         public void run() {
             int orientation = Camera.this.getResources().getConfiguration().orientation;
             Matrix matrix = new Matrix();
-            matrix.postRotate(-90);
+            matrix.postRotate(rotate);
             bitmap = Bitmap.createBitmap(bitmap, 0, 0, bitmap.getWidth(), bitmap.getHeight(), matrix, true);
 //            bitmap = Bitmap.createScaledBitmap(bitmap, xs, ys, false);
             bitmap2 = bitmap2.copy(Bitmap.Config.ARGB_8888, true);
@@ -519,34 +531,32 @@ public class Camera extends AppCompatActivity {
                 Log.e("Coords2", left2 + ";" + up2 + " " + right2 + ";" + down2);
             }
 
-            if (up1 <= up2) {
+            /*if (up1 <= up2) {
                 up2 -= up1;
                 down1 -= up1;
                 down2 -= up1;
                 size.y -= up1;
                 up1 = 0;
-            }
-            else{
+            } else {
                 up1 -= up2;
                 down2 -= up2;
                 down1 -= up2;
                 size.y -= up2;
                 up2 = 0;
             }
-            if (left1 <= left2){
+            if (left1 <= left2) {
                 left2 -= left1;
                 right1 -= left1;
                 right2 -= left1;
                 size.x -= left1;
                 left1 = 0;
-            }
-            else {
+            } else {
                 left1 -= left2;
                 right2 -= left2;
                 right1 -= left2;
                 size.x -= left2;
                 left2 = 0;
-            }
+            }*/
 
             left1 /= (size.x / 100);
             up1 /= (size.y / 100);
@@ -564,8 +574,8 @@ public class Camera extends AppCompatActivity {
                     .build();
             Service service = retrofit.create(Service.class);
 
-            Call<Void> call = service.putCoords(MainActivity.room, left1, up1, right1, down1, 0xff00ff00);
-            Call<Void> call2 = service.putCoords(MainActivity.room, left2, up2, right2, down2, 0xff303f9f);
+            Call<Void> call = service.putCoords(MainActivity.room, left1, up1, right1, down1, 0xff303f9f);
+            Call<Void> call2 = service.putCoords(MainActivity.room, left2, up2, right2, down2, 0xff00ff00);
             try {
                 call.execute();
                 call2.execute();
@@ -574,5 +584,33 @@ public class Camera extends AppCompatActivity {
             }
         }
 
+    }
+
+    private class OrientationListener extends OrientationEventListener {
+        final int ROTATION_O = 1;
+        final int ROTATION_90 = 2;
+        final int ROTATION_180 = 3;
+        final int ROTATION_270 = 4;
+
+        private int rotation = 0;
+
+        public OrientationListener(Context context) {
+            super(context);
+        }
+
+        @Override
+        public void onOrientationChanged(int orientation) {
+            if (((orientation < 35 && orientation > 0) || orientation > 325) && rotation != ROTATION_O) { // PORTRAIT
+                rotation = ROTATION_O;
+                rotate = 0;
+            } else if (orientation > 55 && orientation < 125 && rotation != ROTATION_270) { // REVERSE LANDSCAPE
+                rotation = ROTATION_270;
+                rotate = 90;
+            } else if (orientation > 235 && orientation < 305  && rotation != ROTATION_90) { //LANDSCAPE
+                rotation = ROTATION_90;
+                rotate = -90;
+            }
+            floatingActionButton.setRotation(-rotate);
+        }
     }
 }

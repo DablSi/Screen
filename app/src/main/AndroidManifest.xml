@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-          package="com.example.ducks.screen">
+          xmlns:tools="http://schemas.android.com/tools" package="com.example.ducks.screen">
 
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"/>
     <uses-permission android:name="android.permission.ACCESS_WIFI_STATE"/>
@@ -17,7 +17,7 @@
             android:label="@string/app_name"
             android:roundIcon="@mipmap/ic_launcher_round"
             android:supportsRtl="true"
-            android:theme="@style/Theme.ScreenTheme">
+            android:theme="@style/Theme.ScreenTheme" tools:ignore="GoogleAppIndexingWarning">
         <uses-library
                 android:name="org.apache.http.legacy"
                 android:required="false"/>
@@ -49,7 +49,8 @@
         </activity>
         <activity android:name=".Search">
         </activity>
-        <activity android:name=".Camera">
+        <activity android:name=".Camera"
+        android:screenOrientation="portrait">
         </activity>
     </application>
 
