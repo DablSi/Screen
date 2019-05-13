@@ -574,8 +574,8 @@ public class Camera extends AppCompatActivity {
                     .build();
             Service service = retrofit.create(Service.class);
 
-            Call<Void> call = service.putCoords(MainActivity.room, left1, up1, right1, down1, 0xff303f9f);
-            Call<Void> call2 = service.putCoords(MainActivity.room, left2, up2, right2, down2, 0xff00ff00);
+            Call<Void> call = service.putCoords(MainActivity.room, left1, up1, right1, down1, 0xff00ff00);
+            Call<Void> call2 = service.putCoords(MainActivity.room, left2, up2, right2, down2, 0xff303f9f);
             try {
                 call.execute();
                 call2.execute();
