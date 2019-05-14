@@ -50,6 +50,10 @@ public interface Service {
     @GET("/get/video/{room}")
     public Call<byte[]> getVideo(@Path("room") int room);
 
+    //Получение массива цветов
+    @GET("/get/colors")
+    public Call<int[]> getColors();
+
     //Данные каждого гаджета
     class DeviceData {
         public Integer color, room;

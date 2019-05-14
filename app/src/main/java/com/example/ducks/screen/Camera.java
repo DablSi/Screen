@@ -417,7 +417,6 @@ public class Camera extends AppCompatActivity {
 
         @Override
         public void run() {
-            int orientation = Camera.this.getResources().getConfiguration().orientation;
             Matrix matrix = new Matrix();
             matrix.postRotate(rotate);
             bitmap = Bitmap.createBitmap(bitmap, 0, 0, bitmap.getWidth(), bitmap.getHeight(), matrix, true);
@@ -429,9 +428,22 @@ public class Camera extends AppCompatActivity {
             Bitmap bitmap3 = Bitmap.createBitmap(bitmap.getWidth(), bitmap.getHeight(), Bitmap.Config.ARGB_8888);
             bitmap3 = bitmap3.copy(Bitmap.Config.ARGB_8888, true);
 
+            Retrofit retrofit = new Retrofit.Builder()
+                    .baseUrl(URL)
+                    .addConverterFactory(GsonConverterFactory.create())
+                    .build();
+            Service service = retrofit.create(Service.class);
 
-            LinkedList<Point> linkedList = new LinkedList<>();
-            LinkedList<Point> linkedList2 = new LinkedList<>();
+            Call<int[]> colorCall = service.getColors();
+            int[] colors = new int[0];
+            try {
+                Response<int[]> response= colorCall.execute();
+                colors = response.body();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+
+            ArrayList<LinkedList<Point>> points = new ArrayList<>(colors.length);
             for (int i = 0; i < bitmap.getHeight(); i++) {
                 for (int j = 0; j < bitmap.getWidth(); j++) {
                     if (bitmap.getPixel(j, i) != bitmap2.getPixel(j, i)) {
@@ -439,20 +451,16 @@ public class Camera extends AppCompatActivity {
                         float[] hsv = new float[3];
                         Color.RGBToHSV(Color.red(is), Color.green(is), Color.blue(is), hsv);
 
-                        int need2 = 0xff303f9f;
-                        float[] hsv3 = new float[3];
-                        Color.RGBToHSV(Color.red(need2), Color.green(need2), Color.blue(need2), hsv3);
-                        if (Math.abs(hsv[0] - hsv3[0]) <= 16 && Math.abs(hsv[1] - hsv3[1]) <= 0.35 && Math.abs(hsv[2] - hsv3[2]) <= 0.35) {
-                            bitmap3.setPixel(j, i, Color.GREEN);
-                            linkedList2.add(new Point(j, i));
-                        }
-
-                        int need = 0xff00ff00;
-                        float[] hsv2 = new float[3];
-                        Color.RGBToHSV(Color.red(need), Color.green(need), Color.blue(need), hsv2);
-                        if (Math.abs(hsv[0] - hsv2[0]) <= 25 && Math.abs(hsv[1] - hsv2[1]) <= 0.60 && Math.abs(hsv[2] - hsv2[2]) <= 0.60) {
-                            linkedList.add(new Point(j, i));
-                            bitmap3.setPixel(j, i, Color.RED);
+                        for(int k = 0; k < colors.length; k++) {
+                            if(points.size() == 0 || points.size() <= k) {
+                                points.add(new LinkedList<>());
+                            }
+                            float[] hsv2 = new float[3];
+                            Color.RGBToHSV(Color.red(colors[k]), Color.green(colors[k]), Color.blue(colors[k]), hsv2);
+                            if (Math.abs(hsv[0] - hsv2[0]) <= 18 && Math.abs(hsv[1] - hsv2[1]) <= 0.50 && Math.abs(hsv[2] - hsv2[2]) <= 0.50) {
+                                points.get(k).add(new Point(j, i));
+                                bitmap3.setPixel(j, i, colors[k]);
+                            }
                         }
                     }
                 }
@@ -471,64 +479,50 @@ public class Camera extends AppCompatActivity {
                 }
             };
 
-            int left1 = 0, left2 = 0, right1 = 0, right2 = 0, up1 = 0, up2 = 0, down1 = 0, down2 = 0;
+            int left1 = 0, right1 = 0, up1 = 0, down1 = 0;
             Point size = new Point(bitmap.getWidth(), bitmap.getHeight());
 
-            if (linkedList.size() > 0) {
-                Collections.sort(linkedList, xComparator);
-                left1 = linkedList.getFirst().x;
-                right1 = linkedList.getLast().x;
-                Collections.sort(linkedList, yComparator);
-                up1 = linkedList.getFirst().y;
-                down1 = linkedList.getLast().y;
+            for(int j = 0; j < points.size(); j++) {
+                LinkedList<Point> linkedList = points.get(j);
+                if (linkedList.size() > 0) {
+                    Collections.sort(linkedList, xComparator);
+                    left1 = linkedList.getFirst().x;
+                    right1 = linkedList.getLast().x;
+                    Collections.sort(linkedList, yComparator);
+                    up1 = linkedList.getFirst().y;
+                    down1 = linkedList.getLast().y;
 
-                Bitmap bitmap4 = Bitmap.createBitmap(bitmap.getWidth(), bitmap.getHeight(), Bitmap.Config.ARGB_8888);
-                bitmap4 = bitmap4.copy(Bitmap.Config.ARGB_8888, true);
+                    Bitmap bitmap4 = Bitmap.createBitmap(bitmap.getWidth(), bitmap.getHeight(), Bitmap.Config.ARGB_8888);
+                    bitmap4 = bitmap4.copy(Bitmap.Config.ARGB_8888, true);
 
-                bitmap4.setPixel(left1, up1, Color.RED);
-                bitmap4.setPixel(left1, down1, Color.RED);
-                bitmap4.setPixel(right1, up1, Color.RED);
-                bitmap4.setPixel(right1, down1, Color.RED);
+                    bitmap4.setPixel(left1, up1, colors[j]);
+                    bitmap4.setPixel(left1, down1, colors[j]);
+                    bitmap4.setPixel(right1, up1, colors[j]);
+                    bitmap4.setPixel(right1, down1, colors[j]);
 
-                for (int i = left1; i < right1; i++) {
-                    bitmap4.setPixel(i, up1, Color.RED);
-                    bitmap4.setPixel(i, down1, Color.RED);
+                    for (int i = left1; i < right1; i++) {
+                        bitmap4.setPixel(i, up1, colors[j]);
+                        bitmap4.setPixel(i, down1, colors[j]);
+                    }
+
+                    for (int i = up1; i < down1; i++) {
+                        bitmap4.setPixel(left1, i, colors[j]);
+                        bitmap4.setPixel(right1, i, colors[j]);
+                    }
+
+                    left1 /= (size.x / 100);
+                    up1 /= (size.y / 100);
+                    right1 /= (size.x / 100);
+                    down1 /= (size.y / 100);
+                    Log.e("Coords", left1 + ";" + up1 + " " + right1 + ";" + down1);
+
+                    Call<Void> call = service.putCoords(MainActivity.room, left1, up1, right1, down1, colors[j]);
+                    try {
+                        call.execute();
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
                 }
-
-                for (int i = up1; i < down1; i++) {
-                    bitmap4.setPixel(left1, i, Color.RED);
-                    bitmap4.setPixel(right1, i, Color.RED);
-                }
-
-                Log.e("Coords", left1 + ";" + up1 + " " + right1 + ";" + down1);
-            }
-            if (linkedList2.size() > 0) {
-                Collections.sort(linkedList2, xComparator);
-                left2 = linkedList2.getFirst().x;
-                right2 = linkedList2.getLast().x;
-                Collections.sort(linkedList2, yComparator);
-                up2 = linkedList2.getFirst().y;
-                down2 = linkedList2.getLast().y;
-
-                Bitmap bitmap4 = Bitmap.createBitmap(bitmap.getWidth(), bitmap.getHeight(), Bitmap.Config.ARGB_8888);
-                bitmap4 = bitmap4.copy(Bitmap.Config.ARGB_8888, true);
-
-                bitmap4.setPixel(left2, up2, Color.GREEN);
-                bitmap4.setPixel(left2, down2, Color.GREEN);
-                bitmap4.setPixel(right2, up2, Color.GREEN);
-                bitmap4.setPixel(right2, down2, Color.GREEN);
-
-                for (int i = left2; i < right2; i++) {
-                    bitmap4.setPixel(i, up2, Color.GREEN);
-                    bitmap4.setPixel(i, down2, Color.GREEN);
-                }
-
-                for (int i = up2; i < down2; i++) {
-                    bitmap4.setPixel(left2, i, Color.GREEN);
-                    bitmap4.setPixel(right2, i, Color.GREEN);
-                }
-
-                Log.e("Coords2", left2 + ";" + up2 + " " + right2 + ";" + down2);
             }
 
             /*if (up1 <= up2) {
@@ -557,31 +551,6 @@ public class Camera extends AppCompatActivity {
                 size.x -= left2;
                 left2 = 0;
             }*/
-
-            left1 /= (size.x / 100);
-            up1 /= (size.y / 100);
-            right1 /= (size.x / 100);
-            down1 /= (size.y / 100);
-            left2 /= (size.x / 100);
-            up2 /= (size.y / 100);
-            right2 /= (size.x / 100);
-            down2 /= (size.y / 100);
-            Log.e("Coords", left1 + ";" + up1 + " " + right1 + ";" + down1);
-            Log.e("Coords2", left2 + ";" + up2 + " " + right2 + ";" + down2);
-            Retrofit retrofit = new Retrofit.Builder()
-                    .baseUrl(URL)
-                    .addConverterFactory(GsonConverterFactory.create())
-                    .build();
-            Service service = retrofit.create(Service.class);
-
-            Call<Void> call = service.putCoords(MainActivity.room, left1, up1, right1, down1, 0xff00ff00);
-            Call<Void> call2 = service.putCoords(MainActivity.room, left2, up2, right2, down2, 0xff303f9f);
-            try {
-                call.execute();
-                call2.execute();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
         }
 
     }
@@ -589,7 +558,6 @@ public class Camera extends AppCompatActivity {
     private class OrientationListener extends OrientationEventListener {
         final int ROTATION_O = 1;
         final int ROTATION_90 = 2;
-        final int ROTATION_180 = 3;
         final int ROTATION_270 = 4;
 
         private int rotation = 0;
