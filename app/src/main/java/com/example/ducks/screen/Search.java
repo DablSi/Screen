@@ -66,8 +66,6 @@ public class Search extends AppCompatActivity {
         android_id = android.provider.Settings.Secure.getString(this.getContentResolver(),
                 Settings.Secure.ANDROID_ID);
 
-        hideSystemUI();
-
         FloatingActionButton floatingActionButton = (FloatingActionButton) findViewById(R.id.floatingActionButton);
         floatingActionButton.bringToFront();
         floatingActionButton.setOnClickListener(new View.OnClickListener() {
@@ -79,6 +77,7 @@ public class Search extends AppCompatActivity {
                     relativeLayout.removeView(editText);
                     relativeLayout.removeView(floatingActionButton);
                     relativeLayout.removeView(textView);
+                    hideSystemUI();
                     SendThread sendThread = new SendThread();
                     sendThread.start();
                 }
