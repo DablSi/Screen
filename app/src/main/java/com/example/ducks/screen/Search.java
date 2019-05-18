@@ -29,7 +29,7 @@ import java.util.concurrent.ExecutionException;
 public class Search extends AppCompatActivity {
     RelativeLayout relativeLayout;
     boolean isClicked = false, isTrue = true;
-    public static String URL = "http://192.168.1.5:8080/";
+    public static String URL = "https://server-screen.herokuapp.com/";
     private String android_id;
     private int color = 0x0ff000000;
     public static Integer room;

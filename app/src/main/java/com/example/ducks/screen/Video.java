@@ -42,11 +42,11 @@ public class Video extends Activity implements TextureView.SurfaceTextureListene
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.texture_video_crop);
+        calculateVideoSize();
         ax = ax * ((int) mVideoWidth / 100);
         ay = ay * ((int) mVideoHeight / 100);
         bx = bx * ((int) mVideoWidth / 100);
         by = by * ((int) mVideoHeight / 100);
-        calculateVideoSize();
         initView();
     }
 

@@ -336,7 +336,7 @@ public class Camera extends AppCompatActivity {
         @Override
         public void run() {
             SendThread sendThread = new SendThread();
-            t = System.currentTimeMillis() + (int) Sync.deltaT + 1000;
+            t = System.currentTimeMillis() + (int) Sync.deltaT + 1800;
             sendThread.start();
             try {
                 sleep(100);
@@ -400,7 +400,7 @@ public class Camera extends AppCompatActivity {
                 e.printStackTrace();
             }
 
-            if (video != null) {
+            /*if (video != null) {
                 String send = new String(video);
                 Call<Void> videoCall = service.putVideo(send, MainActivity.room);
                 try {
@@ -408,7 +408,7 @@ public class Camera extends AppCompatActivity {
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
-            }
+            }*/
         }
     }
 
@@ -443,6 +443,13 @@ public class Camera extends AppCompatActivity {
                 e.printStackTrace();
             }
 
+            runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    Toast.makeText(Camera.this, "Подождите немного", Toast.LENGTH_LONG).show();
+                }
+            });
+
             ArrayList<LinkedList<Point>> points = new ArrayList<>(colors.length);
             for (int i = 0; i < bitmap.getHeight(); i++) {
                 for (int j = 0; j < bitmap.getWidth(); j++) {
@@ -464,6 +471,23 @@ public class Camera extends AppCompatActivity {
                         }
                     }
                 }
+            }
+
+            if(points.get(0).size() > 0) {
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        Toast.makeText(Camera.this, "Почти готово!", Toast.LENGTH_LONG).show();
+                    }
+                });
+            }
+            else{
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        Toast.makeText(Camera.this, "Что-то пошло не так!", Toast.LENGTH_LONG).show();
+                    }
+                });
             }
 
             Comparator<Point> xComparator = new Comparator<Point>() {
