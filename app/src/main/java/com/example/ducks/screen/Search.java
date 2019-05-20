@@ -2,6 +2,7 @@ package com.example.ducks.screen;
 
 import android.app.Fragment;
 import android.app.FragmentTransaction;
+import android.content.Intent;
 import android.graphics.Color;
 import android.os.AsyncTask;
 import android.os.Build;
@@ -162,7 +163,32 @@ public class Search extends AppCompatActivity {
                         Video.bx = coords.x2;
                         Video.ay = coords.y1;
                         Video.by = coords.y2;
-                        finish();
+                        runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                relativeLayout.setBackgroundColor(Color.WHITE);
+                                Toast.makeText(Search.this, "Жду время", Toast.LENGTH_LONG).show();
+                                startActivity(new Intent(Search.this, Video.class));
+                            }
+                        });
+                        Long time = null;
+                        Call<Long> call = null;
+                        while (time == null) {
+                            call = service.getStartVideo(android_id);
+                            Response<Long> response = call.execute();
+                            time = response.body();
+                        }
+                        long dif = time - (System.currentTimeMillis() + (int) Sync.deltaT);
+                        if (dif > 0) {
+                            Timer timer = new Timer();
+                            Toast.makeText(getApplicationContext(), getString(R.string.time_more) + " " + dif + " " + getString(R.string.mls), Toast.LENGTH_SHORT).show();
+                            timer.schedule(new TimerTask() {
+                                @Override
+                                public void run() {
+                                    Video.mMediaPlayer.start();
+                                }
+                            }, dif);
+                        }
                     } catch (IOException e) {
                         e.printStackTrace();
                     }

@@ -176,7 +176,7 @@ public class Camera extends AppCompatActivity {
 
                         }
                     }, backgroundHandler);
-        } catch (CameraAccessException e) {
+        } catch (Exception e) {
             e.printStackTrace();
         }
     }
@@ -473,7 +473,7 @@ public class Camera extends AppCompatActivity {
                 }
             }
 
-            if(points.get(0).size() > 0) {
+            if(points.size() > 0 && points.get(0).size() > 0) {
                 runOnUiThread(new Runnable() {
                     @Override
                     public void run() {

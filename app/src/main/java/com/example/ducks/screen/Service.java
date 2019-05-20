@@ -54,6 +54,15 @@ public interface Service {
     @GET("/get/colors")
     public Call<int[]> getColors();
 
+    //Добавить время запуска видео
+    @Multipart
+    @POST("/post/startVideo")
+    public Call<Void> putStartVideo(@Part Integer room, @Part Long date);
+
+    //Получить время запуска видео
+    @GET("/get/startVideo/{device}")
+    public Call<Long> getStartVideo(@Path("device") String device);
+
     //Данные каждого гаджета
     class DeviceData {
         public Integer color, room;

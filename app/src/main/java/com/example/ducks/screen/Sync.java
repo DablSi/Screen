@@ -2,6 +2,7 @@ package com.example.ducks.screen;
 
 import android.app.Service;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.AsyncTask;
 import android.os.IBinder;
 import android.util.Log;
@@ -11,16 +12,22 @@ import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.net.Socket;
+import java.util.Timer;
+import java.util.TimerTask;
 
-import static android.content.ContentValues.TAG;
+import static java.lang.Math.abs;
+
 
 public class Sync extends Service {
+
+    public static final String SYNC = "Sync";
     public static boolean isStarted = false;
-    int D = 0;
-    static float deltaT = 0;
+    public static float deltaT;
+    int D;
     public static String date;
     static long t1, t2, t3;
     public Socket socket;
+
 
     private SyncThread syncThread;
 
@@ -32,7 +39,22 @@ public class Sync extends Service {
     public void onCreate() {
         // сообщение о создании службы
 //        Toast.makeText(this, "Service created", Toast.LENGTH_SHORT).show();
+        SharedPreferences sp = getSharedPreferences("Sync", MODE_PRIVATE);
+        deltaT = sp.getFloat("deltaT", 0);
+        syncThread = new SyncThread();
+        syncThread.execute();
+        new Timer().schedule(new TimerTask() {
+            @Override
+            public void run() {
+                SharedPreferences sp = getSharedPreferences("Sync", MODE_PRIVATE);
+                SharedPreferences.Editor edit = sp.edit();
+                edit.putFloat("deltaT", deltaT);
+                edit.commit();
+            }
+        }, 5000, 5000);
+
     }
+
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
@@ -40,17 +62,15 @@ public class Sync extends Service {
 //        Toast.makeText(this, "Service started", Toast.LENGTH_SHORT).show();
 
         // создаем объект нашего AsyncTask (необходимо для работы с сетью)
-        syncThread = new SyncThread();
-        syncThread.execute();
 
-        return START_NOT_STICKY;
+        return START_STICKY;
     }
 
     @Override
     public void onDestroy() {
         //сообщение об остановке службы
         //Toast.makeText(this, "Service stoped", Toast.LENGTH_SHORT).show();
-        startService(new Intent(this, Sync.class));
+
     }
 
     @Override
@@ -73,7 +93,7 @@ public class Sync extends Service {
             } catch (IOException e) {
                 Log.e("Everything is bad: ", "Not connected");
             }
-            if(socket == null){
+            if (socket == null) {
                 startService(new Intent(Sync.this, Sync.class));
                 isStarted = false;
                 stopService(new Intent(Sync.this, Sync.class));
@@ -96,9 +116,12 @@ public class Sync extends Service {
                     t1 = input.readLong();
                     t2 = input.readLong();
                     t3 = System.currentTimeMillis() + (int) deltaT;
-                    D = (int) (t2 - (t1 + t3) / 2);
-                    deltaT += (float)D / 10;
-                    Log.d(TAG, Long.toString((int) deltaT));
+                    int newD = (int) (t2 - (t1 + t3) / 2);
+                    if (abs(D) < 30 && abs(newD - D) > 15)
+                        continue;
+                    D = newD;
+                    deltaT += (float) D / 10;
+                    if ((t1 / 1000) % 2 == 0) Log.d(SYNC, "delta is " + Long.toString((int) deltaT));
                     Thread.sleep(400);
                 }
 
