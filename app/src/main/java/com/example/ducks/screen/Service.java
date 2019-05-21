@@ -57,7 +57,7 @@ public interface Service {
     //Добавить время запуска видео
     @Multipart
     @POST("/post/startVideo")
-    public Call<Void> putStartVideo(@Part Integer room, @Part Long date);
+    public Call<Void> putStartVideo(@Part("room") Integer room, @Part("date") Long date);
 
     //Получить время запуска видео
     @GET("/get/startVideo/{device}")

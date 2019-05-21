@@ -168,27 +168,33 @@ public class Search extends AppCompatActivity {
                             public void run() {
                                 relativeLayout.setBackgroundColor(Color.WHITE);
                                 Toast.makeText(Search.this, "Жду время", Toast.LENGTH_LONG).show();
-                                startActivity(new Intent(Search.this, Video.class));
                             }
                         });
                         Long time = null;
                         Call<Long> call = null;
-                        while (time == null) {
+                        long dif = 0;
+                        while (dif <= 0) {
                             call = service.getStartVideo(android_id);
                             Response<Long> response = call.execute();
                             time = response.body();
+                            if (time != null)
+                                dif = time - (System.currentTimeMillis() + (int) Sync.deltaT);
                         }
-                        long dif = time - (System.currentTimeMillis() + (int) Sync.deltaT);
-                        if (dif > 0) {
-                            Timer timer = new Timer();
-                            Toast.makeText(getApplicationContext(), getString(R.string.time_more) + " " + dif + " " + getString(R.string.mls), Toast.LENGTH_SHORT).show();
-                            timer.schedule(new TimerTask() {
-                                @Override
-                                public void run() {
-                                    Video.mMediaPlayer.start();
-                                }
-                            }, dif);
-                        }
+                        runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                Toast.makeText(Search.this, "Время получено", Toast.LENGTH_LONG).show();
+                            }
+                        });
+                        Timer timer = new Timer();
+                        Toast.makeText(getApplicationContext(), getString(R.string.time_more) + " " + dif + " " + getString(R.string.mls), Toast.LENGTH_SHORT).show();
+                        timer.schedule(new TimerTask() {
+                            @Override
+                            public void run() {
+                                Video.mMediaPlayer.start();
+                            }
+                        }, dif);
+                        startActivity(new Intent(Search.this, Video.class));
                     } catch (IOException e) {
                         e.printStackTrace();
                     }

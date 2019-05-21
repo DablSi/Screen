@@ -117,8 +117,6 @@ public class Sync extends Service {
                     t2 = input.readLong();
                     t3 = System.currentTimeMillis() + (int) deltaT;
                     int newD = (int) (t2 - (t1 + t3) / 2);
-                    if (abs(D) < 30 && abs(newD - D) > 15)
-                        continue;
                     D = newD;
                     deltaT += (float) D / 10;
                     if ((t1 / 1000) % 2 == 0) Log.d(SYNC, "delta is " + Long.toString((int) deltaT));

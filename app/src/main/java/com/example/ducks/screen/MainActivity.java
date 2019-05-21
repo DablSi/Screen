@@ -52,6 +52,7 @@ public class MainActivity extends AppCompatActivity {
     private static final int REQUEST_TAKE_GALLERY_VIDEO = 0;
     public static byte[] video;
     protected static String android_id;
+    private long time;
 
     private void showFileChooser() {
         if (PackageManager.PERMISSION_GRANTED != ActivityCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE)) {
@@ -202,11 +203,9 @@ public class MainActivity extends AppCompatActivity {
                     long dif = runIn.getTime() - (System.currentTimeMillis() + (int) Sync.deltaT);
                     if (dif <= 0) {
                         Toast.makeText(getApplicationContext(), getString(R.string.time_less), Toast.LENGTH_SHORT).show();
-                    } else {
-                        MyTimer myTimer = new MyTimer();
-                        timer = new Timer();
-                        Toast.makeText(getApplicationContext(), getString(R.string.time_more) + " " + dif + " " + getString(R.string.mls), Toast.LENGTH_SHORT).show();
-                        timer.schedule(myTimer, dif);
+                    } else if(room != -1){
+                        time = runIn.getTime();
+                        new SendTime().start();
                     }
                 } catch (ParseException e) {
                     e.printStackTrace();
@@ -260,19 +259,6 @@ public class MainActivity extends AppCompatActivity {
 
         }
     }
-
-    class MyTimer extends TimerTask {
-        @Override
-        public void run() {
-            if (isPressed) {
-                //if (!isStarted)
-                Video.mMediaPlayer.start();
-                isStarted = true;
-            }
-        }
-
-    }
-
     class NewThread extends AsyncTask<Void, Void, Void> {
 
         @Override
@@ -281,6 +267,23 @@ public class MainActivity extends AppCompatActivity {
                 startService(new Intent(MainActivity.this, Sync.class));
             //startService(new Intent(MainActivity.this, Autorun.class));
             return null;
+        }
+    }
+
+    class SendTime extends Thread{
+        @Override
+        public void run() {
+            super.run();
+            Retrofit retrofit = new Retrofit.Builder()
+                    .baseUrl(URL)
+                    .addConverterFactory(GsonConverterFactory.create())
+                    .build();
+            Call<Void> call = retrofit.create(Service.class).putStartVideo(room,  time);
+            try {
+                call.execute();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
         }
     }
 

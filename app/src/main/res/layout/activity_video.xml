@@ -6,6 +6,7 @@
         android:layout_height="match_parent"
         tools:context=".Video"
         android:orientation="vertical"
+        android:background="#ff000000"
         android:id="@+id/ll">
 
 </LinearLayout>
