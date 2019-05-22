@@ -180,14 +180,13 @@ public class Search extends AppCompatActivity {
                             if (time != null)
                                 dif = time - (System.currentTimeMillis() + (int) Sync.deltaT);
                         }
-                        runOnUiThread(new Runnable() {
+                        /*runOnUiThread(new Runnable() {
                             @Override
                             public void run() {
-                                Toast.makeText(Search.this, "Время получено", Toast.LENGTH_LONG).show();
+                                Toast.makeText(getApplicationContext(), getString(R.string.time_more) + " " + dif + " " + getString(R.string.mls), Toast.LENGTH_SHORT).show();
                             }
-                        });
+                        });*/
                         Timer timer = new Timer();
-                        Toast.makeText(getApplicationContext(), getString(R.string.time_more) + " " + dif + " " + getString(R.string.mls), Toast.LENGTH_SHORT).show();
                         timer.schedule(new TimerTask() {
                             @Override
                             public void run() {

@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">Screen</string>
+    <string name="app_name">Screen Puzzle</string>
     <string name="ready">Готово</string>
     <string name="serv_time">Серверное время:</string>
     <string name="time_less">Время меньше серверного!</string>
