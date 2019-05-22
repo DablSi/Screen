@@ -1,9 +1,11 @@
 package com.example.ducks.screen;
 
 
+import okhttp3.MultipartBody;
 import retrofit2.Call;
 import retrofit2.http.*;
 
+import java.io.IOException;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.LinkedList;
@@ -41,14 +43,12 @@ public interface Service {
     @GET("/get/room")
     public Call<Integer> getRoom();
 
-    //Добавить видео
-    @Multipart
-    @POST("/post/video")
-    public Call<Void> putVideo(@Part("bytes") String bytes, @Part("room") int room);
+    @GET(value = "/download/{room}")
+    public Call<byte[]> getFile(@Path("room") int room);
 
-    //Получение видео
-    @GET("/get/video/{room}")
-    public Call<byte[]> getVideo(@Path("room") int room);
+    @Multipart
+    @POST(value = "/upload")
+    public Call<Void> uploadVideo(@Part MultipartBody.Part video, @Part("room") int room);
 
     //Получение массива цветов
     @GET("/get/colors")

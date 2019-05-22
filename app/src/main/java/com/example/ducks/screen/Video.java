@@ -3,12 +3,14 @@ package com.example.ducks.screen;
 import android.Manifest;
 import android.annotation.SuppressLint;
 import android.app.Activity;
+import android.content.Context;
 import android.content.pm.PackageManager;
 import android.graphics.*;
 import android.media.MediaMetadataRetriever;
 import android.media.MediaPlayer;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.PowerManager;
 import android.support.v4.app.ActivityCompat;
 import android.util.Log;
 import android.view.MotionEvent;
@@ -36,12 +38,16 @@ public class Video extends Activity implements TextureView.SurfaceTextureListene
     static MediaPlayer mMediaPlayer;
     private TextureView mTextureView;
     static String path;
+    private PowerManager.WakeLock wakeLock;
 
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.texture_video_crop);
+        PowerManager powerManager = (PowerManager)Video.this.getSystemService(Context.POWER_SERVICE);
+        wakeLock = powerManager.newWakeLock(PowerManager.FULL_WAKE_LOCK, "screen:logtag");
+        wakeLock.acquire();
         calculateVideoSize();
         ax = ax * ((int) mVideoWidth / 100);
         ay = ay * ((int) mVideoHeight / 100);
@@ -197,6 +203,12 @@ public class Video extends Activity implements TextureView.SurfaceTextureListene
         } catch (IllegalStateException e) {
             e.printStackTrace();
         }
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        wakeLock.release();
     }
 
     @Override

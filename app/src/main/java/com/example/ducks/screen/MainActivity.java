@@ -17,7 +17,11 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.*;
+import okhttp3.MediaType;
+import okhttp3.MultipartBody;
+import okhttp3.RequestBody;
 import retrofit2.Call;
+import retrofit2.Callback;
 import retrofit2.Response;
 import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
@@ -75,12 +79,6 @@ public class MainActivity extends AppCompatActivity {
                 if (selectedImagePath != null) {
                     Log.e("FILE", selectedImagePath);
                     Video.path = selectedImagePath;
-                    video = new byte[(int) new File(selectedImagePath).length()];
-                    try {
-                        new FileInputStream(new File(selectedImagePath)).read(video);
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    }
                 }
             }
         }
@@ -113,6 +111,23 @@ public class MainActivity extends AppCompatActivity {
             } catch (IOException e) {
                 e.printStackTrace();
             }
+            File file = new File(Video.path);
+            RequestBody requestBody = RequestBody.create(MediaType.parse("*/*"), file);
+            MultipartBody.Part fileToUpload = MultipartBody.Part.createFormData("video", file.getName(), requestBody);
+
+            service.uploadVideo(fileToUpload, room)
+                    .enqueue(new Callback<Void>() {
+
+                        @Override
+                        public void onResponse(Call<Void> call, Response<Void> response) {
+
+                        }
+
+                        @Override
+                        public void onFailure(Call<Void> call, Throwable t) {
+
+                        }
+                    });
         }
     }
 
@@ -203,7 +218,7 @@ public class MainActivity extends AppCompatActivity {
                     long dif = runIn.getTime() - (System.currentTimeMillis() + (int) Sync.deltaT);
                     if (dif <= 0) {
                         Toast.makeText(getApplicationContext(), getString(R.string.time_less), Toast.LENGTH_SHORT).show();
-                    } else if(room != -1){
+                    } else if (room != -1) {
                         time = runIn.getTime();
                         new SendTime().start();
                     }
@@ -259,6 +274,7 @@ public class MainActivity extends AppCompatActivity {
 
         }
     }
+
     class NewThread extends AsyncTask<Void, Void, Void> {
 
         @Override
@@ -270,7 +286,7 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    class SendTime extends Thread{
+    class SendTime extends Thread {
         @Override
         public void run() {
             super.run();
@@ -278,7 +294,7 @@ public class MainActivity extends AppCompatActivity {
                     .baseUrl(URL)
                     .addConverterFactory(GsonConverterFactory.create())
                     .build();
-            Call<Void> call = retrofit.create(Service.class).putStartVideo(room,  time);
+            Call<Void> call = retrofit.create(Service.class).putStartVideo(room, time);
             try {
                 call.execute();
             } catch (IOException e) {

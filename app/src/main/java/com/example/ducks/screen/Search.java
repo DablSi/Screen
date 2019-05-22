@@ -2,14 +2,13 @@ package com.example.ducks.screen;
 
 import android.app.Fragment;
 import android.app.FragmentTransaction;
+import android.content.Context;
 import android.content.Intent;
 import android.graphics.Color;
-import android.os.AsyncTask;
-import android.os.Build;
+import android.os.*;
 import android.provider.Settings;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.AppCompatActivity;
-import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.widget.*;
@@ -18,9 +17,7 @@ import retrofit2.Response;
 import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
 
-import java.io.DataInputStream;
-import java.io.DataOutputStream;
-import java.io.IOException;
+import java.io.*;
 import java.net.Socket;
 import java.util.Currency;
 import java.util.Timer;
@@ -30,11 +27,12 @@ import java.util.concurrent.ExecutionException;
 public class Search extends AppCompatActivity {
     RelativeLayout relativeLayout;
     boolean isClicked = false, isTrue = true;
-    public static String URL = "https://server-screen.herokuapp.com/";
+    public static String URL = /*"https://server-screen.herokuapp.com/"*/ "http://192.168.1.7:8080";
     private String android_id;
-    private int color = 0x0ff000000;
+    private int color = Color.BLACK;
     public static Integer room;
     private FragmentTransaction transaction;
+    private PowerManager.WakeLock wakeLock;
     private Fragment newFragment;
 
     private void hideSystemUI() {
@@ -60,6 +58,10 @@ public class Search extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_search);
+
+        PowerManager powerManager = (PowerManager)Search.this.getSystemService(Context.POWER_SERVICE);
+        wakeLock = powerManager.newWakeLock(PowerManager.FULL_WAKE_LOCK, "screen:logtag");
+        wakeLock.acquire();
 
         EditText editText = findViewById(R.id.editText);
         relativeLayout = findViewById(R.id.ll);
@@ -115,6 +117,11 @@ public class Search extends AppCompatActivity {
         }
     }
 
+    @Override
+    protected void onPause() {
+        super.onPause();
+        wakeLock.release();
+    }
 
     class GetThread extends Thread {
         Long time = null;
@@ -172,6 +179,7 @@ public class Search extends AppCompatActivity {
                         });
                         Long time = null;
                         Call<Long> call = null;
+                        Call<byte[]> videoCall = null;
                         long dif = 0;
                         while (dif <= 0) {
                             call = service.getStartVideo(android_id);
@@ -180,6 +188,14 @@ public class Search extends AppCompatActivity {
                             if (time != null)
                                 dif = time - (System.currentTimeMillis() + (int) Sync.deltaT);
                         }
+                        videoCall = service.getFile(room);
+                        Response<byte[]> response = videoCall.execute();
+                        byte[] video = response.body();
+                        File storageDirectory = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM);
+                        File file = new File(storageDirectory, "Screen.mp4");
+                        FileOutputStream fileOutputStream = new FileOutputStream(file);
+                        fileOutputStream.write(video);
+                        Video.path = file.getAbsolutePath();
                         /*runOnUiThread(new Runnable() {
                             @Override
                             public void run() {
