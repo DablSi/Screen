@@ -12,7 +12,11 @@ import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
 import android.widget.*;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import okhttp3.ResponseBody;
 import retrofit2.Call;
+import retrofit2.Callback;
 import retrofit2.Response;
 import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
@@ -27,12 +31,14 @@ import java.util.concurrent.ExecutionException;
 public class Search extends AppCompatActivity {
     RelativeLayout relativeLayout;
     boolean isClicked = false, isTrue = true;
-    public static String URL = "https://server-screen.herokuapp.com/";
+    public static String URL = "http://192.168.1.7:8080";
     private String android_id;
     private int color = Color.BLACK;
     public static Integer room;
     private FragmentTransaction transaction;
     private PowerManager.WakeLock wakeLock;
+    private Response<ResponseBody> responseBody;
+    private long dif = 0;
     private Fragment newFragment;
 
     private void hideSystemUI() {
@@ -59,7 +65,7 @@ public class Search extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_search);
 
-        PowerManager powerManager = (PowerManager)Search.this.getSystemService(Context.POWER_SERVICE);
+        PowerManager powerManager = (PowerManager) Search.this.getSystemService(Context.POWER_SERVICE);
         wakeLock = powerManager.newWakeLock(PowerManager.FULL_WAKE_LOCK, "screen:logtag");
         wakeLock.acquire();
 
@@ -92,9 +98,13 @@ public class Search extends AppCompatActivity {
 
         @Override
         public void run() {
+            Gson gson = new GsonBuilder()
+                    .setLenient()
+                    .create();
+
             Retrofit retrofit = new Retrofit.Builder()
                     .baseUrl(URL)
-                    .addConverterFactory(GsonConverterFactory.create())
+                    .addConverterFactory(GsonConverterFactory.create(gson))
                     .build();
             Service service = retrofit.create(Service.class);
             Call<Void> call = service.putDevice(android_id, room, null);
@@ -120,7 +130,12 @@ public class Search extends AppCompatActivity {
     @Override
     protected void onPause() {
         super.onPause();
-        wakeLock.release();
+        try {
+            if (wakeLock.isHeld())
+                wakeLock.release();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     class GetThread extends Thread {
@@ -154,11 +169,6 @@ public class Search extends AppCompatActivity {
                             relativeLayout.setBackgroundColor(color);
                         }
                     });
-                    try {
-                        Thread.sleep(1000);
-                    } catch (InterruptedException e) {
-                        e.printStackTrace();
-                    }
                     Service.Coords coords = null;
                     try {
                         while (coords == null || coords.y2 == -1) {
@@ -179,8 +189,7 @@ public class Search extends AppCompatActivity {
                         });
                         Long time = null;
                         Call<Long> call = null;
-                        Call<byte[]> videoCall = null;
-                        long dif = 0;
+                        Call<ResponseBody> videoCall = null;
                         while (dif <= 0) {
                             call = service.getStartVideo(android_id);
                             Response<Long> response = call.execute();
@@ -188,33 +197,51 @@ public class Search extends AppCompatActivity {
                             if (time != null)
                                 dif = time - (System.currentTimeMillis() + (int) Sync.deltaT);
                         }
-                        videoCall = service.getFile(room);
-                        Response<byte[]> response = videoCall.execute();
-                        byte[] video = response.body();
-                        File storageDirectory = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM);
-                        File file = new File(storageDirectory, "Screen.mp4");
-                        FileOutputStream fileOutputStream = new FileOutputStream(file);
-                        fileOutputStream.write(video);
-                        Video.path = file.getAbsolutePath();
-                        /*runOnUiThread(new Runnable() {
+                        Call<ResponseBody> call2 = service.getFile(room);
+
+                        call2.enqueue(new Callback<ResponseBody>() {
                             @Override
-                            public void run() {
-                                Toast.makeText(getApplicationContext(), getString(R.string.time_more) + " " + dif + " " + getString(R.string.mls), Toast.LENGTH_SHORT).show();
+                            public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
+                                responseBody = response;
+                                VideoThread videoThread = new VideoThread();
+                                videoThread.start();
                             }
-                        });*/
-                        Timer timer = new Timer();
-                        timer.schedule(new TimerTask() {
+
                             @Override
-                            public void run() {
-                                Video.mMediaPlayer.start();
+                            public void onFailure(Call<ResponseBody> call, Throwable t) {
+                                Log.e("VIDEO", t.getMessage());
                             }
-                        }, dif);
-                        startActivity(new Intent(Search.this, Video.class));
+                        });
                     } catch (IOException e) {
                         e.printStackTrace();
                     }
                 }
             }, time - (System.currentTimeMillis() + (int) Sync.deltaT) - 110);
+        }
+    }
+
+    private class VideoThread extends Thread {
+        @Override
+        public void run() {
+            super.run();
+            try {
+                byte[] video = responseBody.body().bytes();
+                File storageDirectory = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_MOVIES);
+                File file = new File(storageDirectory, "Screen.mp4");
+                FileOutputStream fileOutputStream = new FileOutputStream(file);
+                fileOutputStream.write(video);
+                Video.path = file.getAbsolutePath();
+                Timer timer = new Timer();
+                timer.schedule(new TimerTask() {
+                    @Override
+                    public void run() {
+                        Video.mMediaPlayer.start();
+                    }
+                }, dif);
+                startActivity(new Intent(Search.this, Video.class));
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
         }
     }
 }

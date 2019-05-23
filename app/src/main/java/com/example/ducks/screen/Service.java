@@ -2,6 +2,7 @@ package com.example.ducks.screen;
 
 
 import okhttp3.MultipartBody;
+import okhttp3.ResponseBody;
 import retrofit2.Call;
 import retrofit2.http.*;
 
@@ -44,7 +45,8 @@ public interface Service {
     public Call<Integer> getRoom();
 
     @GET(value = "/download/{room}")
-    public Call<byte[]> getFile(@Path("room") int room);
+    @Streaming
+    public Call<ResponseBody> getFile(@Path("room") int room);
 
     @Multipart
     @POST(value = "/upload")
