@@ -208,6 +208,7 @@ public class Video extends Activity implements TextureView.SurfaceTextureListene
     @Override
     protected void onPause() {
         super.onPause();
+        if(!wakeLock.isHeld())
         wakeLock.release();
     }
 

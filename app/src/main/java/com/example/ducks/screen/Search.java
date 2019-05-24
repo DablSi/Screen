@@ -38,8 +38,8 @@ public class Search extends AppCompatActivity {
     private FragmentTransaction transaction;
     private PowerManager.WakeLock wakeLock;
     private Response<ResponseBody> responseBody;
-    private long dif = 0;
     private Fragment newFragment;
+    private long timeStart = 0;
 
     private void hideSystemUI() {
         // Enables regular immersive mode.
@@ -67,7 +67,7 @@ public class Search extends AppCompatActivity {
 
         PowerManager powerManager = (PowerManager) Search.this.getSystemService(Context.POWER_SERVICE);
         wakeLock = powerManager.newWakeLock(PowerManager.FULL_WAKE_LOCK, "screen:logtag");
-        wakeLock.acquire();
+        //wakeLock.acquire();
 
         EditText editText = findViewById(R.id.editText);
         relativeLayout = findViewById(R.id.ll);
@@ -187,15 +187,12 @@ public class Search extends AppCompatActivity {
                                 Toast.makeText(Search.this, "Жду время", Toast.LENGTH_LONG).show();
                             }
                         });
-                        Long time = null;
                         Call<Long> call = null;
                         Call<ResponseBody> videoCall = null;
-                        while (dif <= 0) {
+                        while (timeStart == 0) {
                             call = service.getStartVideo(android_id);
                             Response<Long> response = call.execute();
-                            time = response.body();
-                            if (time != null)
-                                dif = time - (System.currentTimeMillis() + (int) Sync.deltaT);
+                            timeStart = response.body();
                         }
                         Call<ResponseBody> call2 = service.getFile(room);
 
@@ -223,7 +220,6 @@ public class Search extends AppCompatActivity {
     private class VideoThread extends Thread {
         @Override
         public void run() {
-            super.run();
             try {
                 byte[] video = responseBody.body().bytes();
                 File storageDirectory = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_MOVIES);
@@ -237,7 +233,7 @@ public class Search extends AppCompatActivity {
                     public void run() {
                         Video.mMediaPlayer.start();
                     }
-                }, dif);
+                }, timeStart - (System.currentTimeMillis() + (int) Sync.deltaT));
                 startActivity(new Intent(Search.this, Video.class));
             } catch (Exception e) {
                 e.printStackTrace();
