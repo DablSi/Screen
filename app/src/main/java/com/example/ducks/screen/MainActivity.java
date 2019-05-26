@@ -120,7 +120,12 @@ public class MainActivity extends AppCompatActivity {
 
                         @Override
                         public void onResponse(Call<Void> call, Response<Void> response) {
-
+                            runOnUiThread(new Runnable() {
+                                @Override
+                                public void run() {
+                                    Toast.makeText(MainActivity.this, "Видео загрузилось", Toast.LENGTH_SHORT).show();
+                                }
+                            });
                         }
 
                         @Override
