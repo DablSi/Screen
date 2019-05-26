@@ -124,6 +124,8 @@ public class Search extends AppCompatActivity {
             } catch (IOException e) {
                 e.printStackTrace();
             }
+
+
         }
     }
 
@@ -148,6 +150,8 @@ public class Search extends AppCompatActivity {
                     .addConverterFactory(GsonConverterFactory.create())
                     .build();
             Service service = retrofit.create(Service.class);
+            DownloadThread downloadThread = new DownloadThread();
+            downloadThread.start();
             while (time == null) {
                 Call<Long> call = service.getTime(android_id);
                 try {
@@ -194,26 +198,47 @@ public class Search extends AppCompatActivity {
                             Response<Long> response = call.execute();
                             timeStart = response.body();
                         }
-                        Call<ResponseBody> call2 = service.getFile(room);
-
-                        call2.enqueue(new Callback<ResponseBody>() {
+                        Timer timer = new Timer();
+                        timer.schedule(new TimerTask() {
                             @Override
-                            public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
-                                responseBody = response;
-                                VideoThread videoThread = new VideoThread();
-                                videoThread.start();
+                            public void run() {
+                                Video.mMediaPlayer.start();
                             }
-
-                            @Override
-                            public void onFailure(Call<ResponseBody> call, Throwable t) {
-                                Log.e("VIDEO", t.getMessage());
-                            }
-                        });
+                        }, timeStart - (System.currentTimeMillis() + (int) Sync.deltaT));
+                        while (Video.path == null){}
+                        startActivity(new Intent(Search.this, Video.class));
                     } catch (IOException e) {
                         e.printStackTrace();
                     }
                 }
             }, time - (System.currentTimeMillis() + (int) Sync.deltaT) - 110);
+        }
+    }
+
+    private class DownloadThread extends Thread {
+
+        @Override
+        public void run() {
+            Retrofit retrofit = new Retrofit.Builder()
+                    .baseUrl(URL)
+                    .addConverterFactory(GsonConverterFactory.create())
+                    .build();
+            Service service = retrofit.create(Service.class);
+
+            Call<ResponseBody> call2 = service.getFile(room);
+            call2.enqueue(new Callback<ResponseBody>() {
+                @Override
+                public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
+                    responseBody = response;
+                    VideoThread videoThread = new VideoThread();
+                    videoThread.start();
+                }
+
+                @Override
+                public void onFailure(Call<ResponseBody> call, Throwable t) {
+                    Log.e("VIDEO", t.getMessage());
+                }
+            });
         }
     }
 
@@ -227,14 +252,6 @@ public class Search extends AppCompatActivity {
                 FileOutputStream fileOutputStream = new FileOutputStream(file);
                 fileOutputStream.write(video);
                 Video.path = file.getAbsolutePath();
-                Timer timer = new Timer();
-                timer.schedule(new TimerTask() {
-                    @Override
-                    public void run() {
-                        Video.mMediaPlayer.start();
-                    }
-                }, timeStart - (System.currentTimeMillis() + (int) Sync.deltaT));
-                startActivity(new Intent(Search.this, Video.class));
             } catch (Exception e) {
                 e.printStackTrace();
             }
