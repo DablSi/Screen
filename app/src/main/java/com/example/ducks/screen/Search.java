@@ -157,6 +157,7 @@ public class Search extends AppCompatActivity {
                 try {
                     Response<Long> userResponse = call.execute();
                     time = userResponse.body();
+                    Thread.sleep(150);
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
@@ -178,6 +179,7 @@ public class Search extends AppCompatActivity {
                             Call<Service.Coords> call = service.getCoords(android_id);
                             Response<Service.Coords> response = call.execute();
                             coords = response.body();
+                            Thread.sleep(150);
                         }
                         Video.ax = coords.x1;
                         Video.bx = coords.x2;
@@ -196,6 +198,7 @@ public class Search extends AppCompatActivity {
                             call = service.getStartVideo(android_id);
                             Response<Long> response = call.execute();
                             timeStart = response.body();
+                            Thread.sleep(150);
                         }
                         Timer timer = new Timer();
                         timer.schedule(new TimerTask() {
@@ -204,9 +207,13 @@ public class Search extends AppCompatActivity {
                                 Video.mMediaPlayer.start();
                             }
                         }, timeStart - (System.currentTimeMillis() + (int) Sync.deltaT));
-                        while (Video.path == null){}
+                        while (Video.path == null) {
+                            Thread.sleep(150);
+                        }
                         startActivity(new Intent(Search.this, Video.class));
                     } catch (IOException e) {
+                        e.printStackTrace();
+                    } catch (InterruptedException e) {
                         e.printStackTrace();
                     }
                 }

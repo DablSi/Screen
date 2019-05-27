@@ -2,32 +2,20 @@ package com.example.ducks.screen;
 
 
 import android.Manifest;
-import android.app.Activity;
-import android.app.Application;
-import android.app.assist.AssistStructure;
 import android.content.Context;
 import android.content.pm.ActivityInfo;
 import android.content.pm.PackageManager;
-import android.content.res.Configuration;
-import android.content.res.Resources;
-import android.content.res.TypedArray;
 import android.graphics.*;
-import android.graphics.drawable.Drawable;
-import android.graphics.drawable.GradientDrawable;
 import android.hardware.camera2.*;
 import android.hardware.camera2.params.StreamConfigurationMap;
-import android.media.ExifInterface;
-import android.media.Image;
 import android.media.ImageReader;
 import android.os.*;
-import android.provider.Settings;
 import android.support.annotation.RequiresApi;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.util.*;
 import android.view.*;
-import android.widget.Button;
 import android.widget.Toast;
 import retrofit2.Call;
 import retrofit2.Response;
@@ -35,13 +23,9 @@ import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
 
 import java.io.*;
-import java.nio.ByteBuffer;
-import java.text.SimpleDateFormat;
 import java.util.*;
-import java.util.concurrent.ExecutionException;
 
 import static com.example.ducks.screen.MainActivity.android_id;
-import static com.example.ducks.screen.MainActivity.video;
 import static com.example.ducks.screen.Search.URL;
 
 @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
@@ -343,7 +327,7 @@ public class Camera extends AppCompatActivity {
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
-            Timer timer = new Timer();
+            java.util.Timer timer = new java.util.Timer();
             timer.schedule(new TimerTask() {
                 @Override
                 public void run() {
@@ -402,7 +386,7 @@ public class Camera extends AppCompatActivity {
 
             /*if (video != null) {
                 String send = new String(video);
-                Call<Void> videoCall = service.putVideo(send, MainActivity.room);
+                Call<Void> videoCall = service.putVideo(send, Timer.room);
                 try {
                     videoCall.execute();
                 } catch (Exception e) {
@@ -488,6 +472,7 @@ public class Camera extends AppCompatActivity {
                         Toast.makeText(Camera.this, "Что-то пошло не так!", Toast.LENGTH_LONG).show();
                     }
                 });
+                finish();
             }
 
             Comparator<Point> xComparator = new Comparator<Point>() {

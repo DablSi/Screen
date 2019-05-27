@@ -1,9 +1,6 @@
 package com.example.ducks.screen;
 
-import android.content.Context;
 import android.content.Intent;
-import android.media.Image;
-import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -15,8 +12,8 @@ import android.widget.*;
 
 
 public class Panel extends Fragment {
-    private TextView textView, textView1, textView2;
-    private ImageButton button, button1, button2;
+    private TextView textView, textView1;
+    private ImageButton button, button1;
 
     public void select(ImageButton button, TextView textView) {
         float scale = getResources().getDisplayMetrics().density;
@@ -41,8 +38,6 @@ public class Panel extends Fragment {
         button = view.findViewById(R.id.first);
         button1 = view.findViewById(R.id.second);
         textView1 = view.findViewById(R.id.search);
-        button2 = view.findViewById(R.id.third);
-        textView2 = view.findViewById(R.id.set);
         button.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -51,7 +46,6 @@ public class Panel extends Fragment {
                     Intent intent1 = new Intent(getContext(), MainActivity.class);
                     startActivity(intent1);
                     unselect(button1, textView1);
-                    unselect(button2, textView2);
                 }
             }
         });
@@ -64,20 +58,6 @@ public class Panel extends Fragment {
                     Intent intent1 = new Intent(getContext(), Search.class);
                     startActivity(intent1);
                     unselect(button, textView);
-                    unselect(button2, textView2);
-                }
-            }
-        });
-
-        button2.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                select(button2, textView2);
-                if (!getActivity().getClass().getSimpleName().equals("Settings")) {
-                    Intent intent1 = new Intent(getContext(), Settings.class);
-                    startActivity(intent1);
-                    unselect(button, textView);
-                    unselect(button1, textView1);
                 }
             }
         });
@@ -89,8 +69,6 @@ public class Panel extends Fragment {
             case "Search":
                 select(button1, textView1);
                 break;
-            case "Settings":
-                select(button2, textView2);
         }
         return view;
     }
@@ -102,15 +80,12 @@ public class Panel extends Fragment {
             case "MainActivity":
                 select(button, textView);
                 unselect(button1, textView1);
-                unselect(button2, textView2);
                 break;
             case "Search":
                 select(button1, textView1);
                 unselect(button, textView);
-                unselect(button2, textView2);
                 break;
             case "Settings":
-                select(button2, textView2);
                 unselect(button1, textView1);
                 unselect(button, textView);
         }

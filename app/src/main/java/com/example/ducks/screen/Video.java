@@ -106,7 +106,7 @@ public class Video extends Activity implements TextureView.SurfaceTextureListene
             @Override
             public boolean onTouch(View view, MotionEvent motionEvent) {
                 if (motionEvent.getAction() == MotionEvent.ACTION_UP) {
-                    if (MainActivity.isStarted) {
+                    if (Timer.isStarted) {
                         if (mMediaPlayer.isPlaying()) {
                             showSystemUI();
                             mMediaPlayer.pause();

@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources xmlns:android="http://schemas.android.com/apk/res/android">
-    <style name="Theme.ScreenTheme" parent="Theme.AppCompat.Light">
+    <style name="Theme.ScreenTheme" parent="Theme.AppCompat.Light.NoActionBar">
         <!-- Here we setting appcompat’s actionBarStyle -->
         <!-- <item name="actionBarStyle">@style/MyActionBarStyle</item> -->
 
