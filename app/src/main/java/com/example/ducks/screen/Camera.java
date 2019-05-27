@@ -472,7 +472,6 @@ public class Camera extends AppCompatActivity {
                         Toast.makeText(Camera.this, "Что-то пошло не так!", Toast.LENGTH_LONG).show();
                     }
                 });
-                finish();
             }
 
             Comparator<Point> xComparator = new Comparator<Point>() {
@@ -533,6 +532,8 @@ public class Camera extends AppCompatActivity {
                     }
                 }
             }
+
+            finish();
 
             /*if (up1 <= up2) {
                 up2 -= up1;

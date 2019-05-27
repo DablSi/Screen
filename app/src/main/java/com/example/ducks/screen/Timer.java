@@ -32,8 +32,6 @@ public class Timer extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_timer);
-        NewThread newThread = new NewThread();
-        newThread.execute();
         relativeLayout = findViewById(R.id.ll);
         timePicker = findViewById(R.id.timePicker);
         textView = findViewById(R.id.textView);
@@ -44,6 +42,7 @@ public class Timer extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 new SendTime().start();
+                Toast.makeText(Timer.this, "Время отправлено", Toast.LENGTH_LONG);
             }
         });
 
@@ -95,17 +94,6 @@ public class Timer extends AppCompatActivity {
         }
     }
 
-    class NewThread extends AsyncTask<Void, Void, Void> {
-
-        @Override
-        protected Void doInBackground(Void... voids) {
-            if (!Sync.isStarted)
-                startService(new Intent(Timer.this, Sync.class));
-            startService(new Intent(Timer.this, Autorun.class));
-            return null;
-        }
-    }
-
     class SendTime extends Thread {
         @Override
         public void run() {
@@ -120,6 +108,7 @@ public class Timer extends AppCompatActivity {
             } catch (IOException e) {
                 e.printStackTrace();
             }
+            finish();
         }
     }
 
