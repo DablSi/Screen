@@ -141,7 +141,7 @@ public class Search extends AppCompatActivity {
     }
 
     class GetThread extends Thread {
-        Long time = null;
+        long time = 0;
 
         @Override
         public void run() {
@@ -152,17 +152,16 @@ public class Search extends AppCompatActivity {
             Service service = retrofit.create(Service.class);
             DownloadThread downloadThread = new DownloadThread();
             downloadThread.start();
-            while (time == null) {
+            while (time < System.currentTimeMillis()) {
                 Call<Long> call = service.getTime(android_id);
                 try {
                     Response<Long> userResponse = call.execute();
                     time = userResponse.body();
-                    if (time != null)
-                        Log.d("SEND_AND_RETURN", "" + (time - (System.currentTimeMillis() + (int) Sync.deltaT)));
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
             }
+            Log.d("SEND_AND_RETURN", "" + (time - (System.currentTimeMillis() + (int) Sync.deltaT)));
             Timer timer = new Timer();
             timer.schedule(new TimerTask() {
                 @Override
