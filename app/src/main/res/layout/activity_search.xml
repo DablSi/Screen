@@ -7,7 +7,7 @@
         android:layout_height="match_parent"
         tools:context=".Search"
         android:id="@+id/ll"
-        android:theme="@style/Theme.AppCompat.Light"
+        android:theme="@style/AppTheme"
         android:orientation="vertical">
 
     <TextView android:layout_width="wrap_content"

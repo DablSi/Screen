@@ -200,6 +200,12 @@ public class Search extends AppCompatActivity {
                             timeStart = response.body();
                             Thread.sleep(150);
                         }
+                        runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                Toast.makeText(Search.this, "Время получено", Toast.LENGTH_LONG).show();
+                            }
+                        });
                         Timer timer = new Timer();
                         timer.schedule(new TimerTask() {
                             @Override
