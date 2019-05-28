@@ -340,7 +340,7 @@ public class Camera extends AppCompatActivity {
                     bitmap2 = textureView.getBitmap();
                     new CordThread().start();
                 }
-            }, t - (System.currentTimeMillis() + (int) Sync.deltaT) + 45);
+            }, t - (System.currentTimeMillis() + (int) Sync.deltaT) + 60);
             /*try {
                 Thread.sleep(10);
             } catch (InterruptedException e) {
@@ -421,7 +421,7 @@ public class Camera extends AppCompatActivity {
             Call<int[]> colorCall = service.getColors();
             int[] colors = new int[0];
             try {
-                Response<int[]> response= colorCall.execute();
+                Response<int[]> response = colorCall.execute();
                 colors = response.body();
             } catch (IOException e) {
                 e.printStackTrace();
@@ -437,13 +437,17 @@ public class Camera extends AppCompatActivity {
             ArrayList<LinkedList<Point>> points = new ArrayList<>(colors.length);
             for (int i = 0; i < bitmap.getHeight(); i++) {
                 for (int j = 0; j < bitmap.getWidth(); j++) {
-                    if (bitmap.getPixel(j, i) != bitmap2.getPixel(j, i)) {
-                        int is = bitmap2.getPixel(j, i);
-                        float[] hsv = new float[3];
-                        Color.RGBToHSV(Color.red(is), Color.green(is), Color.blue(is), hsv);
+                    int is = bitmap2.getPixel(j, i);
+                    float[] hsv = new float[3];
+                    Color.RGBToHSV(Color.red(is), Color.green(is), Color.blue(is), hsv);
 
-                        for(int k = 0; k < colors.length; k++) {
-                            if(points.size() == 0 || points.size() <= k) {
+                    int bit1 = bitmap.getPixel(j, i);
+                    float[] hsvb = new float[3];
+                    Color.RGBToHSV(Color.red(bit1), Color.green(bit1), Color.blue(bit1), hsvb);
+                    if (Math.abs(hsv[2] - hsvb[2]) >= 0.50) {
+                        bitmap3.setPixel(j, i, Color.RED);
+                        for (int k = 0; k < colors.length; k++) {
+                            if (points.size() == 0 || points.size() <= k) {
                                 points.add(new LinkedList<>());
                             }
                             float[] hsv2 = new float[3];
@@ -457,15 +461,14 @@ public class Camera extends AppCompatActivity {
                 }
             }
 
-            if(points.size() > 0 && points.get(0).size() > 0) {
+            if (points.size() > 0 && points.get(0).size() > 0) {
                 runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
                         Toast.makeText(Camera.this, "Почти готово!", Toast.LENGTH_LONG).show();
                     }
                 });
-            }
-            else{
+            } else {
                 runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
@@ -490,7 +493,7 @@ public class Camera extends AppCompatActivity {
             int left1 = 0, right1 = 0, up1 = 0, down1 = 0;
             Point size = new Point(bitmap.getWidth(), bitmap.getHeight());
 
-            for(int j = 0; j < points.size(); j++) {
+            for (int j = 0; j < points.size(); j++) {
                 LinkedList<Point> linkedList = points.get(j);
                 if (linkedList.size() > 0) {
                     Collections.sort(linkedList, xComparator);
@@ -584,7 +587,7 @@ public class Camera extends AppCompatActivity {
             } else if (orientation > 55 && orientation < 125 && rotation != ROTATION_270) { // REVERSE LANDSCAPE
                 rotation = ROTATION_270;
                 rotate = 90;
-            } else if (orientation > 235 && orientation < 305  && rotation != ROTATION_90) { //LANDSCAPE
+            } else if (orientation > 235 && orientation < 305 && rotation != ROTATION_90) { //LANDSCAPE
                 rotation = ROTATION_90;
                 rotate = -90;
             }

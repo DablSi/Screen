@@ -39,6 +39,7 @@ public class MainActivity extends AppCompatActivity {
     public static byte[] video;
     public static int room = -1;
     private TextView textView1;
+    private boolean isUploaded = false;
     protected static String android_id;
     private Button button;
 
@@ -68,7 +69,7 @@ public class MainActivity extends AppCompatActivity {
                 }
             }
         }
-        if(requestCode == REQUEST_START_CAMERA_ACTIVITY){
+        if (requestCode == REQUEST_START_CAMERA_ACTIVITY) {
             startActivity(new Intent(MainActivity.this, Timer.class));
         }
     }
@@ -111,6 +112,7 @@ public class MainActivity extends AppCompatActivity {
                             Toast.makeText(MainActivity.this, "Видео загрузилось", Toast.LENGTH_LONG).show();
                             textView1.setText(getString(R.string.roomNum) + room);
                             button.setText("Сфотографировать видеостену");
+                            isUploaded = true;
                             button.setOnClickListener(new View.OnClickListener() {
                                 @Override
                                 public void onClick(View v) {
@@ -161,19 +163,29 @@ public class MainActivity extends AppCompatActivity {
         textView1 = findViewById(R.id.textView1);
         android_id = android.provider.Settings.Secure.getString(this.getContentResolver(),
                 Settings.Secure.ANDROID_ID);
-        button.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                showFileChooser();
-            }
-        });
+        if (!isUploaded)
+            button.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    showFileChooser();
+                }
+            });
+        else{
+            button.setText("Сфотографировать видеостену");
+            button.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    startActivityForResult(new Intent(MainActivity.this, Camera.class), REQUEST_START_CAMERA_ACTIVITY);
+                }
+            });
+        }
     }
 
     @Override
     protected void onResume() {
         super.onResume();
         setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
-        if (room != -1)
+        if (room != -1 && isUploaded)
             textView1.setText(getString(R.string.roomNum) + room);
     }
 
