@@ -39,7 +39,7 @@ public class MainActivity extends AppCompatActivity {
     public static byte[] video;
     public static int room = -1;
     private TextView textView1;
-    private boolean isUploaded = false;
+    private static boolean isUploaded = false;
     protected static String android_id;
     private Button button;
 
@@ -163,6 +163,8 @@ public class MainActivity extends AppCompatActivity {
         textView1 = findViewById(R.id.textView1);
         android_id = android.provider.Settings.Secure.getString(this.getContentResolver(),
                 Settings.Secure.ANDROID_ID);
+        if (room != -1 && isUploaded)
+            textView1.setText(getString(R.string.roomNum) + room);
         if (!isUploaded)
             button.setOnClickListener(new View.OnClickListener() {
                 @Override
@@ -184,7 +186,7 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onResume() {
         super.onResume();
-        setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
+        //setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
         if (room != -1 && isUploaded)
             textView1.setText(getString(R.string.roomNum) + room);
     }

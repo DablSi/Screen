@@ -44,7 +44,7 @@ public class Camera extends AppCompatActivity {
     private CaptureRequest.Builder captureRequestBuilder;
     private CaptureRequest captureRequest;
     private ImageReader mImageReader;
-    private Bitmap bitmap, bitmap2;
+    private Bitmap bitmap, bitmap2, bitmapPseudo;
     private Size previewSize;
     private long t;
     private OrientationListener orientationListener;
@@ -320,7 +320,7 @@ public class Camera extends AppCompatActivity {
         @Override
         public void run() {
             SendThread sendThread = new SendThread();
-            t = System.currentTimeMillis() + (int) Sync.deltaT + 1800;
+            t = System.currentTimeMillis() + (int) Sync.deltaT + 2500;
             sendThread.start();
             try {
                 sleep(100);
@@ -338,9 +338,15 @@ public class Camera extends AppCompatActivity {
                 @Override
                 public void run() {
                     bitmap2 = textureView.getBitmap();
-                    new CordThread().start();
                 }
             }, t - (System.currentTimeMillis() + (int) Sync.deltaT) + 60);
+            timer.schedule(new TimerTask() {
+                @Override
+                public void run() {
+                    bitmapPseudo = textureView.getBitmap();
+                    new CordThread().start();
+                }
+            }, t - (System.currentTimeMillis() + (int) Sync.deltaT) + 80);
             /*try {
                 Thread.sleep(10);
             } catch (InterruptedException e) {
@@ -405,8 +411,8 @@ public class Camera extends AppCompatActivity {
             matrix.postRotate(rotate);
             bitmap = Bitmap.createBitmap(bitmap, 0, 0, bitmap.getWidth(), bitmap.getHeight(), matrix, true);
 //            bitmap = Bitmap.createScaledBitmap(bitmap, xs, ys, false);
-            bitmap2 = bitmap2.copy(Bitmap.Config.ARGB_8888, true);
-            bitmap2 = Bitmap.createBitmap(bitmap2, 0, 0, bitmap2.getWidth(), bitmap2.getHeight(), matrix, true);
+            bitmapPseudo = bitmapPseudo.copy(Bitmap.Config.ARGB_8888, true);
+            bitmapPseudo = Bitmap.createBitmap(bitmapPseudo, 0, 0, bitmapPseudo.getWidth(), bitmapPseudo.getHeight(), matrix, true);
 //            bitmap2 = Bitmap.createScaledBitmap(bitmap2, xs, ys, false);
 
             Bitmap bitmap3 = Bitmap.createBitmap(bitmap.getWidth(), bitmap.getHeight(), Bitmap.Config.ARGB_8888);
@@ -437,14 +443,14 @@ public class Camera extends AppCompatActivity {
             ArrayList<LinkedList<Point>> points = new ArrayList<>(colors.length);
             for (int i = 0; i < bitmap.getHeight(); i++) {
                 for (int j = 0; j < bitmap.getWidth(); j++) {
-                    int is = bitmap2.getPixel(j, i);
+                    int is = bitmapPseudo.getPixel(j, i);
                     float[] hsv = new float[3];
                     Color.RGBToHSV(Color.red(is), Color.green(is), Color.blue(is), hsv);
 
                     int bit1 = bitmap.getPixel(j, i);
                     float[] hsvb = new float[3];
                     Color.RGBToHSV(Color.red(bit1), Color.green(bit1), Color.blue(bit1), hsvb);
-                    if (Math.abs(hsv[2] - hsvb[2]) >= 0.50) {
+                    if (Math.abs(hsv[0] - hsvb[0]) >= 20 && Math.abs(hsv[1] - hsvb[1]) >= 0.30 && Math.abs(hsv[2] - hsvb[2]) >= 0.10) {
                         bitmap3.setPixel(j, i, Color.RED);
                         for (int k = 0; k < colors.length; k++) {
                             if (points.size() == 0 || points.size() <= k) {
@@ -452,7 +458,8 @@ public class Camera extends AppCompatActivity {
                             }
                             float[] hsv2 = new float[3];
                             Color.RGBToHSV(Color.red(colors[k]), Color.green(colors[k]), Color.blue(colors[k]), hsv2);
-                            if (Math.abs(hsv[0] - hsv2[0]) <= 18 && Math.abs(hsv[1] - hsv2[1]) <= 0.50 && Math.abs(hsv[2] - hsv2[2]) <= 0.50) {
+                            float f = 9;
+                            if (Math.abs(hsv[0] - hsv2[0]) <= 50 && Math.abs(hsv[1] - hsv2[1]) <= 0.50 && Math.abs(hsv[2] - hsv2[2]) <= 0.40) {
                                 points.get(k).add(new Point(j, i));
                                 bitmap3.setPixel(j, i, colors[k]);
                             }
