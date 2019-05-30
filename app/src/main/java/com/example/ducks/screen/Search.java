@@ -33,7 +33,7 @@ public class Search extends AppCompatActivity {
     boolean isClicked = false, isTrue = true;
     public static String URL = "http://192.168.1.7:8080";
     private String android_id;
-    private int color = Color.BLACK;
+    private int color1, color2;
     public static Integer room;
     private FragmentTransaction transaction;
     private PowerManager.WakeLock wakeLock;
@@ -82,7 +82,6 @@ public class Search extends AppCompatActivity {
             public void onClick(View v) {
                 if (!editText.getText().toString().equals("")) {
                     Search.room = Integer.parseInt(editText.getText().toString());
-                    relativeLayout.setBackgroundColor(color);
                     relativeLayout.removeView(editText);
                     relativeLayout.removeView(floatingActionButton);
                     relativeLayout.removeView(textView);
@@ -117,10 +116,17 @@ public class Search extends AppCompatActivity {
                 e.printStackTrace();
             }
 
-            Call<Integer> call2 = service.getColor(android_id);
+            Call<int[]> call2 = service.getColor(android_id);
             try {
-                Response<Integer> colorResponse = call2.execute();
-                color = colorResponse.body();
+                Response<int[]> colorResponse = call2.execute();
+                color1 = colorResponse.body()[0];
+                color2 = colorResponse.body()[1];
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        relativeLayout.setBackgroundColor(color1);
+                    }
+                });
             } catch (IOException e) {
                 e.printStackTrace();
             }
@@ -170,7 +176,7 @@ public class Search extends AppCompatActivity {
                     runOnUiThread(new Runnable() {
                         @Override
                         public void run() {
-                            relativeLayout.setBackgroundColor(color);
+                            relativeLayout.setBackgroundColor(color2);
                         }
                     });
                     Service.Coords coords = null;

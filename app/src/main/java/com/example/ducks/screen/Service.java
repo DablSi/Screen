@@ -37,7 +37,7 @@ public interface Service {
     //Получить цвет
     //Search +
     @GET("/get/color/{device}")
-    public Call<Integer> getColor(@Path("device") String device);
+    public Call<int[]> getColor(@Path("device") String device);
 
     //Получение номера комнаты
     //Camera +
@@ -64,6 +64,10 @@ public interface Service {
     //Получить время запуска видео
     @GET("/get/startVideo/{device}")
     public Call<Long> getStartVideo(@Path("device") String device);
+
+    //Получение индексов цветов
+    @GET("/get/indexes/{room}")
+    public Call<int[]> getIndexes(@Path("room") int room);
 
     //Данные каждого гаджета
     class DeviceData {
