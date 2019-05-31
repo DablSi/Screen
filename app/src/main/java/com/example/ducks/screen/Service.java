@@ -22,7 +22,7 @@ public interface Service {
     //Camera
     @Multipart
     @POST("/post/coords")
-    public Call<Void> putCoords(@Part("room") int room, @Part("x1") int x1, @Part("y1") int y1, @Part("x2") int x2, @Part("y2") int y2, @Part("color") int color);
+    public Call<Void> putCoords(@Part("room") int room, @Part("x1") int x1, @Part("y1") int y1, @Part("x2") int x2, @Part("y2") int y2, @Part("color") int[] color);
 
     //Получить координаты
     //Video

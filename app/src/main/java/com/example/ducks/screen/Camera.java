@@ -403,6 +403,32 @@ public class Camera extends AppCompatActivity {
         }
     }
 
+    void bitmapUpload(Bitmap b, int i) {
+        try {
+            ByteArrayOutputStream stream = new ByteArrayOutputStream();
+            b.compress(Bitmap.CompressFormat.PNG, 100, stream);
+            byte[] byteArray = stream.toByteArray();
+            File storageDirectory = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS);
+            File file = new File(storageDirectory, "Screen" + i + ".png");
+            FileOutputStream fileOutputStream = new FileOutputStream(file);
+            fileOutputStream.write(byteArray);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    Bitmap bitmapDownload(int i) {
+        File storageDirectory = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS);
+        File file = new File(storageDirectory, "Screen" + i + ".png");
+        FileInputStream fileInputStream = null;
+        try {
+            fileInputStream = new FileInputStream(file);
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        }
+        return BitmapFactory.decodeStream(fileInputStream);
+    }
+
 
     class CordThread extends Thread {
 
@@ -415,6 +441,12 @@ public class Camera extends AppCompatActivity {
             bitmap2 = bitmap2.copy(Bitmap.Config.ARGB_8888, true);
             bitmap2 = Bitmap.createBitmap(bitmap2, 0, 0, bitmap2.getWidth(), bitmap2.getHeight(), matrix, true);
 //            bitmap2 = Bitmap.createScaledBitmap(bitmap2, xs, ys, false);
+
+            bitmapUpload(bitmap, 1);
+            bitmapUpload(bitmap2, 2);
+
+//            bitmap = bitmapDownload(1);
+//            bitmap2 = bitmapDownload(2);
 
             Bitmap bitmap3 = Bitmap.createBitmap(bitmap.getWidth(), bitmap.getHeight(), Bitmap.Config.ARGB_8888);
             bitmap3 = bitmap3.copy(Bitmap.Config.ARGB_8888, true);
@@ -453,17 +485,17 @@ public class Camera extends AppCompatActivity {
             TreeMap<Integer, TreeMap<Integer, LinkedList<Point>>> points = new TreeMap<>();
             for (int k = 0; k <= indexes[0]; k++) {
                 points.put(k, new TreeMap<>());
-                for (int l = 0; l <= indexes[1]; l++) {
+                for (int l = 1; l <= indexes[1]; l++) {
                     points.get(k).put(l, new LinkedList<>());
                 }
             }
             for (int i = 0; i < bitmap.getHeight(); i++) {
                 for (int j = 0; j < bitmap.getWidth(); j++) {
-                    int first = bitmap.getPixel(j, i);
+                    Integer first = bitmap.getPixel(j, i);
                     float[] hsv1 = new float[3];
                     Color.RGBToHSV(Color.red(first), Color.green(first), Color.blue(first), hsv1);
 
-                    int second = bitmap2.getPixel(j, i);
+                    Integer second = bitmap2.getPixel(j, i);
                     float[] hsv2 = new float[3];
                     Color.RGBToHSV(Color.red(second), Color.green(second), Color.blue(second), hsv2);
 
@@ -473,7 +505,7 @@ public class Camera extends AppCompatActivity {
 
                         first = testColor(Color.red(first), Color.green(first), Color.blue(first));
                         second = testColor(Color.red(second), Color.green(second), Color.blue(second));
-                        if (first == -1 || second == -1) {
+                        if (first == null || second == null) {
                             continue;
                         }
 
@@ -492,9 +524,9 @@ public class Camera extends AppCompatActivity {
                             }
                         }
 
-                        bitmap3.setPixel(j, i, colors[ind1]);
+                        //bitmap3.setPixel(j, i, colors[ind1]);
 
-                        if (ind1 == ind2 || (ind1 * 4 + ind2) >= points.size())
+                        if (ind1 == ind2 || ind1 >= points.size() || points.get(ind1).size() < ind2)
                             continue;
 
                         points.get(ind1).get(ind2).add(new Point(j, i));
@@ -536,7 +568,7 @@ public class Camera extends AppCompatActivity {
             Point size = new Point(bitmap.getWidth(), bitmap.getHeight());
 
             for (int i = 0; i < points.size(); i++) {
-                for (int j = 0; j < points.get(i).size(); j++) {
+                for (int j = 1; j <= points.get(i).size(); j++) {
                     LinkedList<Point> linkedList = points.get(i).get(j);
                     if (linkedList.size() > 0) {
                         Collections.sort(linkedList, xComparator);
@@ -560,7 +592,9 @@ public class Camera extends AppCompatActivity {
                         down1 /= (size.y / 100);
                         Log.e("Coords", left1 + ";" + up1 + " " + right1 + ";" + down1);
 
-                        Call<Void> call = service.putCoords(MainActivity.room, left1, up1, right1, down1, colors[j]);
+                        int ind[] = {i, j};
+
+                        Call<Void> call = service.putCoords(MainActivity.room, left1, up1, right1, down1, ind);
                         try {
                             call.execute();
                         } catch (IOException e) {
@@ -602,17 +636,18 @@ public class Camera extends AppCompatActivity {
 
     }
 
-    public int testColor(int R, int G, int B) {
+    public Integer testColor(int R, int G, int B) {
         int newR = (int) ((double) R / ((double) (R + G + B) / (double) 100));
         int newG = (int) ((double) G / ((double) (R + G + B) / (double) 100));
         int newB = (int) ((double) B / ((double) (R + G + B) / (double) 100));
-        if (newR > 60) return Color.RED;
-        if (newG > 60) return Color.GREEN;
-        if (newB > 60) return Color.BLUE;
-        if (R < 10 && G < 10 && B < 10) return Color.BLACK;
-        if (newR > 30 && newG > 30 && newB > 30) return Color.WHITE;
+        double deviation = 0.3; //% отклонения
+        if (R < 30 && G < 30 && B < 30) return Color.BLACK;
+        if (R > 60 && G > 60 && B > 60) return Color.WHITE;
+        if (newR > 60 && R > G + G * deviation && R > B + B * deviation) return Color.RED;
+        if (newG > 60 && G > R + R * deviation && G > B + B * deviation) return Color.GREEN;
+        if (newB > 70 && B > G + G * deviation && B > R + R * deviation) return Color.BLUE;
         // Цвет отсутствует
-        return -1;
+        return null;
     }
 
 
