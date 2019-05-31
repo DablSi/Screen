@@ -323,11 +323,6 @@ public class Camera extends AppCompatActivity {
             SendThread sendThread = new SendThread();
             t = System.currentTimeMillis() + (int) Sync.deltaT + 2500;
             sendThread.start();
-            try {
-                sleep(100);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
             java.util.Timer timer = new java.util.Timer();
             timer.schedule(new TimerTask() {
                 @Override
@@ -485,8 +480,16 @@ public class Camera extends AppCompatActivity {
             TreeMap<Integer, TreeMap<Integer, LinkedList<Point>>> points = new TreeMap<>();
             for (int k = 0; k <= indexes[0]; k++) {
                 points.put(k, new TreeMap<>());
-                for (int l = 1; l <= indexes[1]; l++) {
-                    points.get(k).put(l, new LinkedList<>());
+                if (k + 1 > indexes[0]) {
+                    for (int l = 0; l <= indexes[1]; l++) {
+                        if (k != l)
+                            points.get(k).put(l, new LinkedList<>());
+                    }
+                } else {
+                    for (int l = 0; l < colors.length; l++) {
+                        if (k != l)
+                            points.get(k).put(l, new LinkedList<>());
+                    }
                 }
             }
             for (int i = 0; i < bitmap.getHeight(); i++) {
@@ -568,7 +571,9 @@ public class Camera extends AppCompatActivity {
             Point size = new Point(bitmap.getWidth(), bitmap.getHeight());
 
             for (int i = 0; i < points.size(); i++) {
-                for (int j = 1; j <= points.get(i).size(); j++) {
+                for (int j = 0; j <= points.get(i).size(); j++) {
+                    if(j == i)
+                        continue;
                     LinkedList<Point> linkedList = points.get(i).get(j);
                     if (linkedList.size() > 0) {
                         Collections.sort(linkedList, xComparator);
