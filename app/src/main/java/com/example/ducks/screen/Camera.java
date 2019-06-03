@@ -432,19 +432,19 @@ public class Camera extends AppCompatActivity {
 
         @Override
         public void run() {
-            Matrix matrix = new Matrix();
-            matrix.postRotate(rotate);
-            bitmap = Bitmap.createBitmap(bitmap, 0, 0, bitmap.getWidth(), bitmap.getHeight(), matrix, true);
-//            bitmap = Bitmap.createScaledBitmap(bitmap, xs, ys, false);
-            bitmap2 = bitmap2.copy(Bitmap.Config.ARGB_8888, true);
-            bitmap2 = Bitmap.createBitmap(bitmap2, 0, 0, bitmap2.getWidth(), bitmap2.getHeight(), matrix, true);
-//            bitmap2 = Bitmap.createScaledBitmap(bitmap2, xs, ys, false);
-
-            bitmapUpload(bitmap, 1);
-            bitmapUpload(bitmap2, 2);
+//            Matrix matrix = new Matrix();
+//            matrix.postRotate(rotate);
+//            bitmap = Bitmap.createBitmap(bitmap, 0, 0, bitmap.getWidth(), bitmap.getHeight(), matrix, true);
+////            bitmap = Bitmap.createScaledBitmap(bitmap, xs, ys, false);
+//            bitmap2 = bitmap2.copy(Bitmap.Config.ARGB_8888, true);
+//            bitmap2 = Bitmap.createBitmap(bitmap2, 0, 0, bitmap2.getWidth(), bitmap2.getHeight(), matrix, true);
+////            bitmap2 = Bitmap.createScaledBitmap(bitmap2, xs, ys, false);
 //
-//            bitmap = bitmapDownload(1);
-//            bitmap2 = bitmapDownload(2);
+//            bitmapUpload(bitmap, 1);
+//            bitmapUpload(bitmap2, 2);
+
+            bitmap = bitmapDownload(1);
+            bitmap2 = bitmapDownload(2);
 
             bitmap = Bitmap.createScaledBitmap(bitmap, bitmap.getWidth() / 3, bitmap.getHeight() / 3, false);
             bitmap2 = Bitmap.createScaledBitmap(bitmap2, bitmap2.getWidth() / 3, bitmap2.getHeight() / 3, false);
@@ -512,9 +512,8 @@ public class Camera extends AppCompatActivity {
                     Color.RGBToHSV(Color.red(second), Color.green(second), Color.blue(second), hsv2);
 
 
-                    if (Math.abs(hsv2[0] - hsv1[0]) >= 80 && Math.abs(hsv2[2] - hsv1[2]) >= 0.10
+                    if (Math.abs(hsv2[0] - hsv1[0]) >= 80 && Math.abs(hsv2[2] - hsv1[2]) >= 0.05
                             && comparePixel(first, second)) {
-                        bitmap3.setPixel(j, i, Color.YELLOW);
 
                         first = testColor(Color.red(first), Color.green(first), Color.blue(first));
                         second = testColor(Color.red(second), Color.green(second), Color.blue(second));
@@ -536,7 +535,7 @@ public class Camera extends AppCompatActivity {
 
                         //bitmap3.setPixel(j, i, colors[ind1]);
 
-                        if (ind1 == ind2 || ind1 >= points.size() || points.get(ind1).size() < ind2)
+                        if (ind1 == ind2 || ind1 >= points.size() || points.get(ind1).size() <= ind2)
                             continue;
 
                         points.get(ind1).get(ind2).add(new Point(j, i));
@@ -544,7 +543,6 @@ public class Camera extends AppCompatActivity {
                     }
                 }
             }
-
 
             if (points.get(0).get(1).size() > 0) {
                 runOnUiThread(new Runnable() {
@@ -580,6 +578,8 @@ public class Camera extends AppCompatActivity {
             int left1 = 0, right1 = 0, up1 = 0, down1 = 0;
             Point size = new Point(bitmap.getWidth(), bitmap.getHeight());
 
+            Bitmap bitmap4 = Bitmap.createBitmap(bitmap.getWidth(), bitmap.getHeight(), Bitmap.Config.ARGB_8888);
+            bitmap4 = bitmap4.copy(Bitmap.Config.ARGB_8888, true);
 
             for (int i = 0; i < points.size(); i++) {
                 for (int j = 0; j <= points.get(i).size(); j++) {
@@ -587,6 +587,13 @@ public class Camera extends AppCompatActivity {
                         continue;
                     LinkedList<Point> linkedList = points.get(i).get(j);
                     if (linkedList.size() > 0) {
+                        for (int k = 0; k < linkedList.size(); k++) {
+                            Point p = linkedList.get(k);
+                            if (bitmap3.getPixel(p.x, p.y) != colors[j]){
+                                linkedList.remove(k);
+                                k--;
+                            }
+                        }
                         Collections.sort(linkedList, xComparator);
                         left1 = linkedList.getFirst().x;
                         right1 = linkedList.getLast().x;
@@ -594,40 +601,50 @@ public class Camera extends AppCompatActivity {
                         up1 = linkedList.getFirst().y;
                         down1 = linkedList.getLast().y;
 
-                        if (bitmap3.getPixel(left1, up1) != colors[j]) {
-                            while (linkedList.size() > 0 && linkedList.getFirst().y == up1)
-                                linkedList.removeFirst();
-                            Collections.sort(linkedList, xComparator);
-                            while (linkedList.size() > 0 && linkedList.getFirst().x == left1)
-                                linkedList.removeFirst();
-                            if (linkedList.size() > 0)
-                                j--;
-                            continue;
-                        }
-
-                        if (bitmap3.getPixel(right1, down1) != colors[j]) {
-                            while (linkedList.size() > 0 && linkedList.getLast().y == down1)
-                                linkedList.removeLast();
-                            Collections.sort(linkedList, xComparator);
-                            while (linkedList.size() > 0 && linkedList.getLast().x == right1)
-                                linkedList.removeLast();
-                            if (linkedList.size() > 0)
-                                j--;
-                            continue;
-                        }
-
-                        Bitmap bitmap4 = Bitmap.createBitmap(bitmap.getWidth(), bitmap.getHeight(), Bitmap.Config.ARGB_8888);
-                        bitmap4 = bitmap4.copy(Bitmap.Config.ARGB_8888, true);
+//                        if (bitmap3.getPixel(left1, up1) != colors[j]) {
+//                            while (linkedList.size() > 0 && linkedList.getFirst().y == up1)
+//                                linkedList.removeFirst();
+//                            Collections.sort(linkedList, xComparator);
+//                            if (bitmap3.getPixel(left1, linkedList.getFirst().y) != colors[j])
+//                                while (linkedList.size() > 0 && linkedList.getFirst().x == left1)
+//                                    linkedList.removeFirst();
+//                            if (linkedList.size() > 0)
+//                                j--;
+//                            continue;
+//                        }
+//
+//                        if (bitmap3.getPixel(right1, down1) != colors[j]) {
+//                            Collections.sort(linkedList, yComparator);
+//                            while (linkedList.size() > 0 && linkedList.getLast().y == down1)
+//                                linkedList.removeLast();
+//                            Collections.sort(linkedList, xComparator);
+//                            if (bitmap3.getPixel(left1, linkedList.getLast().y) != colors[j])
+//                                while (linkedList.size() > 0 && linkedList.getLast().x == right1)
+//                                    linkedList.removeLast();
+//                            if (linkedList.size() > 0)
+//                                j--;
+//                            continue;
+//                        }
 
                         bitmap4.setPixel(left1, up1, colors[j]);
                         bitmap4.setPixel(left1, down1, colors[j]);
                         bitmap4.setPixel(right1, up1, colors[j]);
                         bitmap4.setPixel(right1, down1, colors[j]);
 
-                        left1 /= ((float)bitmap.getWidth() / (float)100);
-                        up1 /= ((float)bitmap.getHeight() / (float)100);
-                        right1 /= ((float)bitmap.getWidth() / (float)100);
-                        down1 /= ((float)bitmap.getHeight() / (float)100);
+                        for (int k = left1; k < right1; k++) {
+                            bitmap4.setPixel(k, up1, colors[j]);
+                            bitmap4.setPixel(k, down1, colors[j]);
+                        }
+
+                        for (int k = up1; k < down1; k++) {
+                            bitmap4.setPixel(left1, k, colors[j]);
+                            bitmap4.setPixel(right1, k, colors[j]);
+                        }
+
+                        left1 /= ((float) bitmap.getWidth() / (float) 100);
+                        up1 /= ((float) bitmap.getHeight() / (float) 100);
+                        right1 /= ((float) bitmap.getWidth() / (float) 100);
+                        down1 /= ((float) bitmap.getHeight() / (float) 100);
                         Log.e("Coords", left1 + ";" + up1 + " " + right1 + ";" + down1);
 
                         int[] ind = {i, j};
@@ -685,15 +702,15 @@ public class Camera extends AppCompatActivity {
         for (int i = _R; i < arr.getHeight() - _R; i++) {
             for (int j = _R; j < arr.getWidth() - _R; j++) {
                 if (arr.getPixel(j, i) == UNKNOWN)
-                    for (int k = i - _R; k < i + _R; k++) {
-                        for (int l = j - _R; l < j + _R; l++) {
+                    for (int k = i - _R; k <= i + _R; k++) {
+                        for (int l = j - _R; l <= j + _R; l++) {
                             arr_.setPixel(l, k, UNKNOWN);
                         }
                     }
             }
         }
-        for (int i = _R; i < arr.getHeight() - _R; i++)
-            for (int j = _R; j < arr.getWidth() - _R; j++)
+        for (int i = 0; i < arr.getHeight(); i++)
+            for (int j = 0; j < arr.getWidth(); j++)
                 if (arr_.getPixel(j, i) == UNKNOWN)
                     arr.setPixel(j, i, UNKNOWN);
         return;
@@ -705,16 +722,16 @@ public class Camera extends AppCompatActivity {
         for (int i = _R; i < arr.getHeight() - _R; i++) {
             for (int j = _R; j < arr.getWidth() - _R; j++) {
                 if (arr.getPixel(j, i) != UNKNOWN)
-                    for (int k = i - _R; k < i + _R; k++) {
-                        for (int l = j - _R; l < j + _R; l++) {
+                    for (int k = i - _R; k <= i + _R; k++) {
+                        for (int l = j - _R; l <= j + _R; l++) {
                             if (arr.getPixel(l, k) == UNKNOWN)
                                 arr_.setPixel(l, k, arr.getPixel(j, i));
                         }
                     }
             }
         }
-        for (int i = _R; i < arr.getHeight() - _R; i++)
-            for (int j = _R; j < arr.getWidth() - _R; j++)
+        for (int i = 0; i < arr.getHeight(); i++)
+            for (int j = 0; j < arr.getWidth(); j++)
                 if (arr_.getPixel(j, i) != 0)
                     arr.setPixel(j, i, arr_.getPixel(j, i));
         return;

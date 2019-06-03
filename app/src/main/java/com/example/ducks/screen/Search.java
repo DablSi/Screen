@@ -229,7 +229,7 @@ public class Search extends AppCompatActivity {
                         e.printStackTrace();
                     }
                 }
-            }, time - (System.currentTimeMillis() + (int) Sync.deltaT) - 90);
+            }, time - (System.currentTimeMillis() + (int) Sync.deltaT) - 80);
         }
     }
 
