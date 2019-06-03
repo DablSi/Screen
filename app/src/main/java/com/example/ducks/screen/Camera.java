@@ -6,6 +6,7 @@ import android.content.Context;
 import android.content.pm.ActivityInfo;
 import android.content.pm.PackageManager;
 import android.graphics.*;
+import android.graphics.Bitmap.Config;
 import android.hardware.camera2.*;
 import android.hardware.camera2.params.StreamConfigurationMap;
 import android.media.ImageReader;
@@ -52,6 +53,8 @@ public class Camera extends AppCompatActivity {
     private int rotate;
     private int xs = 640, ys = 360;
     private FloatingActionButton floatingActionButton;
+    public static final int _R = 4;
+    public static final int UNKNOWN = 0xFFFF00FF;
 
     private void hideSystemUI() {
         // Enables regular immersive mode.
@@ -335,14 +338,14 @@ public class Camera extends AppCompatActivity {
                 public void run() {
                     bitmap2 = textureView.getBitmap();
                 }
-            }, t - (System.currentTimeMillis() + (int) Sync.deltaT) + 60);
+            }, t - (System.currentTimeMillis() + (int) Sync.deltaT) + 10);
             timer.schedule(new TimerTask() {
                 @Override
                 public void run() {
                     bitmap2 = textureView.getBitmap();
                     new CordThread().start();
                 }
-            }, t - (System.currentTimeMillis() + (int) Sync.deltaT) + 80);
+            }, t - (System.currentTimeMillis() + (int) Sync.deltaT) + 60);
             /*try {
                 Thread.sleep(10);
             } catch (InterruptedException e) {
@@ -439,9 +442,12 @@ public class Camera extends AppCompatActivity {
 
             bitmapUpload(bitmap, 1);
             bitmapUpload(bitmap2, 2);
-
+//
 //            bitmap = bitmapDownload(1);
 //            bitmap2 = bitmapDownload(2);
+
+            bitmap = Bitmap.createScaledBitmap(bitmap, bitmap.getWidth() / 3, bitmap.getHeight() / 3, false);
+            bitmap2 = Bitmap.createScaledBitmap(bitmap2, bitmap2.getWidth() / 3, bitmap2.getHeight() / 3, false);
 
             Bitmap bitmap3 = Bitmap.createBitmap(bitmap.getWidth(), bitmap.getHeight(), Bitmap.Config.ARGB_8888);
             bitmap3 = bitmap3.copy(Bitmap.Config.ARGB_8888, true);
@@ -482,18 +488,21 @@ public class Camera extends AppCompatActivity {
                 points.put(k, new TreeMap<>());
                 if (k + 1 > indexes[0]) {
                     for (int l = 0; l <= indexes[1]; l++) {
-                        if (k != l)
+                        if (k != l) {
                             points.get(k).put(l, new LinkedList<>());
+                        }
                     }
                 } else {
                     for (int l = 0; l < colors.length; l++) {
-                        if (k != l)
+                        if (k != l) {
                             points.get(k).put(l, new LinkedList<>());
+                        }
                     }
                 }
             }
             for (int i = 0; i < bitmap.getHeight(); i++) {
                 for (int j = 0; j < bitmap.getWidth(); j++) {
+                    bitmap3.setPixel(j, i, UNKNOWN);
                     Integer first = bitmap.getPixel(j, i);
                     float[] hsv1 = new float[3];
                     Color.RGBToHSV(Color.red(first), Color.green(first), Color.blue(first), hsv1);
@@ -503,14 +512,12 @@ public class Camera extends AppCompatActivity {
                     Color.RGBToHSV(Color.red(second), Color.green(second), Color.blue(second), hsv2);
 
 
-                    if (Math.abs(hsv2[0] - hsv1[0]) >= 80 && Math.abs(hsv2[2] - hsv1[2]) >= 0.10) {
+                    if (Math.abs(hsv2[0] - hsv1[0]) >= 80 && Math.abs(hsv2[2] - hsv1[2]) >= 0.10
+                            && comparePixel(first, second)) {
                         bitmap3.setPixel(j, i, Color.YELLOW);
 
                         first = testColor(Color.red(first), Color.green(first), Color.blue(first));
                         second = testColor(Color.red(second), Color.green(second), Color.blue(second));
-                        if (first == null || second == null) {
-                            continue;
-                        }
 
                         int ind1 = 0;
                         for (int k = 0; k < colors.length; k++) {
@@ -533,12 +540,13 @@ public class Camera extends AppCompatActivity {
                             continue;
 
                         points.get(ind1).get(ind2).add(new Point(j, i));
-                        bitmap3.setPixel(j, i, colors[ind2]);
+                        bitmap3.setPixel(j, i, second);
                     }
                 }
             }
 
-            if (points.size() > 0 && points.get(0).size() > 0) {
+
+            if (points.get(0).get(1).size() > 0) {
                 runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
@@ -553,6 +561,8 @@ public class Camera extends AppCompatActivity {
                     }
                 });
             }
+
+            denoise(bitmap3);
 
             Comparator<Point> xComparator = new Comparator<Point>() {
                 @Override
@@ -570,9 +580,10 @@ public class Camera extends AppCompatActivity {
             int left1 = 0, right1 = 0, up1 = 0, down1 = 0;
             Point size = new Point(bitmap.getWidth(), bitmap.getHeight());
 
+
             for (int i = 0; i < points.size(); i++) {
                 for (int j = 0; j <= points.get(i).size(); j++) {
-                    if(j == i)
+                    if (j == i)
                         continue;
                     LinkedList<Point> linkedList = points.get(i).get(j);
                     if (linkedList.size() > 0) {
@@ -583,6 +594,28 @@ public class Camera extends AppCompatActivity {
                         up1 = linkedList.getFirst().y;
                         down1 = linkedList.getLast().y;
 
+                        if (bitmap3.getPixel(left1, up1) != colors[j]) {
+                            while (linkedList.size() > 0 && linkedList.getFirst().y == up1)
+                                linkedList.removeFirst();
+                            Collections.sort(linkedList, xComparator);
+                            while (linkedList.size() > 0 && linkedList.getFirst().x == left1)
+                                linkedList.removeFirst();
+                            if (linkedList.size() > 0)
+                                j--;
+                            continue;
+                        }
+
+                        if (bitmap3.getPixel(right1, down1) != colors[j]) {
+                            while (linkedList.size() > 0 && linkedList.getLast().y == down1)
+                                linkedList.removeLast();
+                            Collections.sort(linkedList, xComparator);
+                            while (linkedList.size() > 0 && linkedList.getLast().x == right1)
+                                linkedList.removeLast();
+                            if (linkedList.size() > 0)
+                                j--;
+                            continue;
+                        }
+
                         Bitmap bitmap4 = Bitmap.createBitmap(bitmap.getWidth(), bitmap.getHeight(), Bitmap.Config.ARGB_8888);
                         bitmap4 = bitmap4.copy(Bitmap.Config.ARGB_8888, true);
 
@@ -591,13 +624,13 @@ public class Camera extends AppCompatActivity {
                         bitmap4.setPixel(right1, up1, colors[j]);
                         bitmap4.setPixel(right1, down1, colors[j]);
 
-                        left1 /= (size.x / 100);
-                        up1 /= (size.y / 100);
-                        right1 /= (size.x / 100);
-                        down1 /= (size.y / 100);
+                        left1 /= ((float)bitmap.getWidth() / (float)100);
+                        up1 /= ((float)bitmap.getHeight() / (float)100);
+                        right1 /= ((float)bitmap.getWidth() / (float)100);
+                        down1 /= ((float)bitmap.getHeight() / (float)100);
                         Log.e("Coords", left1 + ";" + up1 + " " + right1 + ";" + down1);
 
-                        int ind[] = {i, j};
+                        int[] ind = {i, j};
 
                         Call<Void> call = service.putCoords(MainActivity.room, left1, up1, right1, down1, ind);
                         try {
@@ -641,6 +674,60 @@ public class Camera extends AppCompatActivity {
 
     }
 
+    public void denoise(Bitmap arr) {
+        erosion(arr);
+        dilating(arr);
+    }
+
+    public void erosion(Bitmap arr) {
+        Bitmap arr_ = arr.createBitmap(arr.getWidth(), arr.getHeight(), Bitmap.Config.ARGB_8888);
+        arr_ = arr_.copy(Bitmap.Config.ARGB_8888, true);
+        for (int i = _R; i < arr.getHeight() - _R; i++) {
+            for (int j = _R; j < arr.getWidth() - _R; j++) {
+                if (arr.getPixel(j, i) == UNKNOWN)
+                    for (int k = i - _R; k < i + _R; k++) {
+                        for (int l = j - _R; l < j + _R; l++) {
+                            arr_.setPixel(l, k, UNKNOWN);
+                        }
+                    }
+            }
+        }
+        for (int i = _R; i < arr.getHeight() - _R; i++)
+            for (int j = _R; j < arr.getWidth() - _R; j++)
+                if (arr_.getPixel(j, i) == UNKNOWN)
+                    arr.setPixel(j, i, UNKNOWN);
+        return;
+    }
+
+    public void dilating(Bitmap arr) {
+        Bitmap arr_ = arr.createBitmap(arr.getWidth(), arr.getHeight(), Bitmap.Config.ARGB_8888);
+        arr_ = arr_.copy(Bitmap.Config.ARGB_8888, true);
+        for (int i = _R; i < arr.getHeight() - _R; i++) {
+            for (int j = _R; j < arr.getWidth() - _R; j++) {
+                if (arr.getPixel(j, i) != UNKNOWN)
+                    for (int k = i - _R; k < i + _R; k++) {
+                        for (int l = j - _R; l < j + _R; l++) {
+                            if (arr.getPixel(l, k) == UNKNOWN)
+                                arr_.setPixel(l, k, arr.getPixel(j, i));
+                        }
+                    }
+            }
+        }
+        for (int i = _R; i < arr.getHeight() - _R; i++)
+            for (int j = _R; j < arr.getWidth() - _R; j++)
+                if (arr_.getPixel(j, i) != 0)
+                    arr.setPixel(j, i, arr_.getPixel(j, i));
+        return;
+    }
+
+
+    public boolean comparePixel(int pix1, int pix2) {
+        int dR = Math.abs(Color.red(pix1) - Color.red(pix2));
+        int dG = Math.abs(Color.green(pix1) - Color.green(pix2));
+        int dB = Math.abs(Color.blue(pix1) - Color.blue(pix2));
+        return dR > 50 || dG > 50 || dB > 50;
+    }
+
     public Integer testColor(int R, int G, int B) {
         int newR = (int) ((double) R / ((double) (R + G + B) / (double) 100));
         int newG = (int) ((double) G / ((double) (R + G + B) / (double) 100));
@@ -652,7 +739,7 @@ public class Camera extends AppCompatActivity {
         if (newG > 60 && G > R + R * deviation && G > B + B * deviation) return Color.GREEN;
         if (newB > 70 && B > G + G * deviation && B > R + R * deviation) return Color.BLUE;
         // Цвет отсутствует
-        return null;
+        return UNKNOWN;
     }
 
 
