@@ -432,19 +432,19 @@ public class Camera extends AppCompatActivity {
 
         @Override
         public void run() {
-//            Matrix matrix = new Matrix();
-//            matrix.postRotate(rotate);
-//            bitmap = Bitmap.createBitmap(bitmap, 0, 0, bitmap.getWidth(), bitmap.getHeight(), matrix, true);
-////            bitmap = Bitmap.createScaledBitmap(bitmap, xs, ys, false);
-//            bitmap2 = bitmap2.copy(Bitmap.Config.ARGB_8888, true);
-//            bitmap2 = Bitmap.createBitmap(bitmap2, 0, 0, bitmap2.getWidth(), bitmap2.getHeight(), matrix, true);
-////            bitmap2 = Bitmap.createScaledBitmap(bitmap2, xs, ys, false);
-//
-//            bitmapUpload(bitmap, 1);
-//            bitmapUpload(bitmap2, 2);
+            Matrix matrix = new Matrix();
+            matrix.postRotate(rotate);
+            bitmap = Bitmap.createBitmap(bitmap, 0, 0, bitmap.getWidth(), bitmap.getHeight(), matrix, true);
+//            bitmap = Bitmap.createScaledBitmap(bitmap, xs, ys, false);
+            bitmap2 = bitmap2.copy(Bitmap.Config.ARGB_8888, true);
+            bitmap2 = Bitmap.createBitmap(bitmap2, 0, 0, bitmap2.getWidth(), bitmap2.getHeight(), matrix, true);
+//            bitmap2 = Bitmap.createScaledBitmap(bitmap2, xs, ys, false);
 
-            bitmap = bitmapDownload(1);
-            bitmap2 = bitmapDownload(2);
+            bitmapUpload(bitmap, 1);
+            bitmapUpload(bitmap2, 2);
+//
+//            bitmap = bitmapDownload(1);
+//            bitmap2 = bitmapDownload(2);
 
             bitmap = Bitmap.createScaledBitmap(bitmap, bitmap.getWidth() / 3, bitmap.getHeight() / 3, false);
             bitmap2 = Bitmap.createScaledBitmap(bitmap2, bitmap2.getWidth() / 3, bitmap2.getHeight() / 3, false);
