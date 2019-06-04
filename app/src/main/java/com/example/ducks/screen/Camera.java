@@ -512,8 +512,7 @@ public class Camera extends AppCompatActivity {
                     Color.RGBToHSV(Color.red(second), Color.green(second), Color.blue(second), hsv2);
 
 
-                    if (Math.abs(hsv2[0] - hsv1[0]) >= 80 && Math.abs(hsv2[2] - hsv1[2]) >= 0.05
-                            && comparePixel(first, second)) {
+                    if (comparePixel(first, second)) {
 
                         first = testColor(Color.red(first), Color.green(first), Color.blue(first));
                         second = testColor(Color.red(second), Color.green(second), Color.blue(second));
@@ -535,7 +534,7 @@ public class Camera extends AppCompatActivity {
 
                         //bitmap3.setPixel(j, i, colors[ind1]);
 
-                        if (ind1 == ind2 || ind1 >= points.size() || points.get(ind1).size() <= ind2)
+                        if (ind1 == ind2 || ind1 >= points.size() || points.get(ind1).size() < ind2)
                             continue;
 
                         points.get(ind1).get(ind2).add(new Point(j, i));
@@ -589,7 +588,7 @@ public class Camera extends AppCompatActivity {
                     if (linkedList.size() > 0) {
                         for (int k = 0; k < linkedList.size(); k++) {
                             Point p = linkedList.get(k);
-                            if (bitmap3.getPixel(p.x, p.y) != colors[j]){
+                            if (bitmap3.getPixel(p.x, p.y) != colors[j]) {
                                 linkedList.remove(k);
                                 k--;
                             }
@@ -699,14 +698,20 @@ public class Camera extends AppCompatActivity {
     public void erosion(Bitmap arr) {
         Bitmap arr_ = arr.createBitmap(arr.getWidth(), arr.getHeight(), Bitmap.Config.ARGB_8888);
         arr_ = arr_.copy(Bitmap.Config.ARGB_8888, true);
-        for (int i = _R; i < arr.getHeight() - _R; i++) {
-            for (int j = _R; j < arr.getWidth() - _R; j++) {
-                if (arr.getPixel(j, i) == UNKNOWN)
-                    for (int k = i - _R; k <= i + _R; k++) {
-                        for (int l = j - _R; l <= j + _R; l++) {
+        for (int i = 0; i < arr.getHeight() - _R; i++) {
+            for (int j = 0; j < arr.getWidth() - _R; j++) {
+                if (arr.getPixel(j, i) == UNKNOWN) {
+                    int _i = i, _j = j;
+                    if (i < _R)
+                        _i = _R;
+                    if (j < _R)
+                        _j = _R;
+                    for (int k = _i - _R; k <= i + _R; k++) {
+                        for (int l = _j - _R; l <= j + _R; l++) {
                             arr_.setPixel(l, k, UNKNOWN);
                         }
                     }
+                }
             }
         }
         for (int i = 0; i < arr.getHeight(); i++)
