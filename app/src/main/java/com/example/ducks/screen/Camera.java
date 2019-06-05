@@ -442,7 +442,7 @@ public class Camera extends AppCompatActivity {
 
             bitmapUpload(bitmap, 1);
             bitmapUpload(bitmap2, 2);
-//
+
 //            bitmap = bitmapDownload(1);
 //            bitmap2 = bitmapDownload(2);
 
@@ -585,14 +585,14 @@ public class Camera extends AppCompatActivity {
                     if (j == i)
                         continue;
                     LinkedList<Point> linkedList = points.get(i).get(j);
-                    if (linkedList.size() > 0) {
-                        for (int k = 0; k < linkedList.size(); k++) {
-                            Point p = linkedList.get(k);
-                            if (bitmap3.getPixel(p.x, p.y) != colors[j]) {
-                                linkedList.remove(k);
-                                k--;
-                            }
+                    for (int k = 0; k < linkedList.size(); k++) {
+                        Point p = linkedList.get(k);
+                        if (bitmap3.getPixel(p.x, p.y) != colors[j]) {
+                            linkedList.remove(k);
+                            k--;
                         }
+                    }
+                    if (linkedList.size() > 0) {
                         Collections.sort(linkedList, xComparator);
                         left1 = linkedList.getFirst().x;
                         right1 = linkedList.getLast().x;

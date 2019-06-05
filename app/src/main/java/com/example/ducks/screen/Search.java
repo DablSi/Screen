@@ -35,8 +35,6 @@ public class Search extends AppCompatActivity {
     private String android_id;
     private int color1, color2;
     public static Integer room;
-    private FragmentTransaction transaction;
-    private PowerManager.WakeLock wakeLock;
     private Response<ResponseBody> responseBody;
     private Fragment newFragment;
     private long timeStart = 0;
@@ -64,10 +62,6 @@ public class Search extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_search);
-
-        PowerManager powerManager = (PowerManager) Search.this.getSystemService(Context.POWER_SERVICE);
-        wakeLock = powerManager.newWakeLock(PowerManager.FULL_WAKE_LOCK, "screen:logtag");
-        //wakeLock.acquire();
 
         EditText editText = findViewById(R.id.editText);
         relativeLayout = findViewById(R.id.ll);
@@ -132,17 +126,6 @@ public class Search extends AppCompatActivity {
             }
 
 
-        }
-    }
-
-    @Override
-    protected void onPause() {
-        super.onPause();
-        try {
-            if (wakeLock.isHeld())
-                wakeLock.release();
-        } catch (Exception e) {
-            e.printStackTrace();
         }
     }
 
