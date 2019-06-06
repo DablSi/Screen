@@ -1,7 +1,5 @@
 package com.example.ducks.screen;
 
-import android.app.Fragment;
-import android.app.FragmentTransaction;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Color;
@@ -22,35 +20,29 @@ import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
 
 import java.io.*;
-import java.net.Socket;
-import java.util.Currency;
 import java.util.Timer;
 import java.util.TimerTask;
-import java.util.concurrent.ExecutionException;
 
 public class Search extends AppCompatActivity {
-    RelativeLayout relativeLayout;
+    private RelativeLayout relativeLayout;
     boolean isClicked = false, isTrue = true;
     public static String URL = "https://cloud.itx.ru:444/Server-0.0.1-SNAPSHOT/";
     private String android_id;
     private int color1, color2;
     public static Integer room;
     private Response<ResponseBody> responseBody;
-    private Fragment newFragment;
     private long timeStart = 0;
     private PowerManager.WakeLock wakeLock;
 
+    //для полноэкранного режима
     private void hideSystemUI() {
         View decorView = getWindow().getDecorView();
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
             decorView.setSystemUiVisibility(
                     View.SYSTEM_UI_FLAG_IMMERSIVE
-                            // Set the content to appear under the system bars so that the
-                            // content doesn't resize when the system bars hide and show.
                             | View.SYSTEM_UI_FLAG_LAYOUT_STABLE
                             | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
                             | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
-                            // Hide the nav bar and status bar
                             | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
                             | View.SYSTEM_UI_FLAG_FULLSCREEN);
         }
@@ -61,9 +53,10 @@ public class Search extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_search);
 
-        PowerManager powerManager = (PowerManager)Search.this.getSystemService(Context.POWER_SERVICE);
+        PowerManager powerManager = (PowerManager) Search.this.getSystemService(Context.POWER_SERVICE);
         wakeLock = powerManager.newWakeLock(PowerManager.FULL_WAKE_LOCK, "screen:logtag");
         wakeLock.acquire();
+        //отключение блокировки экрана
 
         EditText editText = findViewById(R.id.editText);
         relativeLayout = findViewById(R.id.ll);
@@ -105,6 +98,7 @@ public class Search extends AppCompatActivity {
             Call<Void> call = service.putDevice(android_id, room, null);
             try {
                 call.execute();
+                //добавление телефона в комнату
                 Log.d("SEND_AND_RETURN", "Ready.");
                 GetThread getThread = new GetThread();
                 getThread.start();
@@ -117,6 +111,7 @@ public class Search extends AppCompatActivity {
                 Response<int[]> colorResponse = call2.execute();
                 color1 = colorResponse.body()[0];
                 color2 = colorResponse.body()[1];
+                //получение цветов
                 runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
@@ -143,12 +138,14 @@ public class Search extends AppCompatActivity {
             Service service = retrofit.create(Service.class);
             DownloadThread downloadThread = new DownloadThread();
             downloadThread.start();
-            while (time < System.currentTimeMillis()) {
+            while (time <= (System.currentTimeMillis() + 100)) {
                 Call<Long> call = service.getTime(android_id);
                 try {
                     Response<Long> userResponse = call.execute();
                     time = userResponse.body();
-                    Thread.sleep(150);
+                    //получение времени запуска видео
+                    if (time <= (System.currentTimeMillis() + 100))
+                        Thread.sleep(150);
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
@@ -176,6 +173,7 @@ public class Search extends AppCompatActivity {
                         Video.bx = coords.x2;
                         Video.ay = coords.y1;
                         Video.by = coords.y2;
+                        //получение координат
                         runOnUiThread(new Runnable() {
                             @Override
                             public void run() {
@@ -185,10 +183,11 @@ public class Search extends AppCompatActivity {
                         });
                         Call<Long> call = null;
                         Call<ResponseBody> videoCall = null;
-                        while (timeStart == 0) {
+                        while (timeStart < System.currentTimeMillis()) {
                             call = service.getStartVideo(android_id);
                             Response<Long> response = call.execute();
                             timeStart = response.body();
+                            //получение времени начала видео
                             Thread.sleep(150);
                         }
                         runOnUiThread(new Runnable() {
@@ -202,6 +201,7 @@ public class Search extends AppCompatActivity {
                             @Override
                             public void run() {
                                 Video.mMediaPlayer.start();
+                                //начало видео
                             }
                         }, timeStart - (System.currentTimeMillis() + (int) Sync.deltaT));
                         while (Video.path == null) {
@@ -235,6 +235,7 @@ public class Search extends AppCompatActivity {
                     responseBody = response;
                     VideoThread videoThread = new VideoThread();
                     videoThread.start();
+                    //видео получено
                 }
 
                 @Override

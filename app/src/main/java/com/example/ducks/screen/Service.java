@@ -44,12 +44,12 @@ public interface Service {
     @GET("/Server-0.0.1-SNAPSHOT/get/room")
     public Call<Integer> getRoom();
 
-    @GET(value = "/download/{room}")
+    @GET(value = "/Server-0.0.1-SNAPSHOT/download/{room}")
     @Streaming
     public Call<ResponseBody> getFile(@Path("room") int room);
 
     @Multipart
-    @POST(value = "/upload")
+    @POST(value = "/Server-0.0.1-SNAPSHOT/upload")
     public Call<Void> uploadVideo(@Part MultipartBody.Part video, @Part("room") int room);
 
     //Получение массива цветов

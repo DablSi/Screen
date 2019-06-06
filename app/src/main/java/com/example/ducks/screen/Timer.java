@@ -1,7 +1,5 @@
 package com.example.ducks.screen;
 
-import android.content.Intent;
-import android.graphics.Point;
 import android.os.*;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
@@ -50,6 +48,7 @@ public class Timer extends AppCompatActivity {
 
         ChangeText changeText = new ChangeText(Integer.MAX_VALUE, 1000);
         changeText.start();
+        //обновление времени каждую секунду
         timePicker.setIs24HourView(true);
 
         timePicker.setOnTimeChangedListener(new TimePicker.OnTimeChangedListener() {
@@ -62,10 +61,10 @@ public class Timer extends AppCompatActivity {
                     long dif = runIn.getTime() - (System.currentTimeMillis() + (int) Sync.deltaT);
                     if (dif <= 0) {
                         button.setVisibility(View.INVISIBLE);
-                        //Toast.makeText(getApplicationContext(), getString(R.string.time_less), Toast.LENGTH_SHORT).show();
                     } else if (room != -1) {
                         time = runIn.getTime();
                         button.setVisibility(View.VISIBLE);
+                        //появление кнопки
                     }
                 } catch (ParseException e) {
                     e.printStackTrace();
@@ -82,10 +81,8 @@ public class Timer extends AppCompatActivity {
 
         @Override
         public void onTick(long l) {
-            //!!!
             SimpleDateFormat output = new SimpleDateFormat("HH:mm:ss");
-            //!!!
-            textView.setText("Время: " + output.format(new Date((int) Sync.deltaT + System.currentTimeMillis())) /*+ " delta:" + Sync.deltaT*/);
+            textView.setText("Время: " + output.format(new Date((int) Sync.deltaT + System.currentTimeMillis())));
         }
 
         @Override
@@ -105,6 +102,7 @@ public class Timer extends AppCompatActivity {
             Call<Void> call = retrofit.create(Service.class).putStartVideo(room, time);
             try {
                 call.execute();
+                //отправка времени
             } catch (IOException e) {
                 e.printStackTrace();
             }

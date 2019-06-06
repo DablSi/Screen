@@ -158,7 +158,7 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        new NewThread().execute();
+        new ServiceThread().execute();
         button = findViewById(R.id.start);
         textView1 = findViewById(R.id.textView1);
         android_id = android.provider.Settings.Secure.getString(this.getContentResolver(),
@@ -190,7 +190,7 @@ public class MainActivity extends AppCompatActivity {
             textView1.setText(getString(R.string.roomNum) + room);
     }
 
-    class NewThread extends AsyncTask<Void, Void, Void> {
+    class ServiceThread extends AsyncTask<Void, Void, Void> {
 
         @Override
         protected Void doInBackground(Void... voids) {

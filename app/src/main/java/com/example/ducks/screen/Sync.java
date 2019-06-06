@@ -37,12 +37,11 @@ public class Sync extends Service {
 
     @Override
     public void onCreate() {
-        // сообщение о создании службы
-//        Toast.makeText(this, "Service created", Toast.LENGTH_SHORT).show();
         SharedPreferences sp = getSharedPreferences("Sync", MODE_PRIVATE);
         deltaT = sp.getFloat("deltaT", 0);
         syncThread = new SyncThread();
         syncThread.execute();
+        //получение прошлой дельты из sharedPreferences
         new Timer().schedule(new TimerTask() {
             @Override
             public void run() {
@@ -52,25 +51,13 @@ public class Sync extends Service {
                 edit.commit();
             }
         }, 5000, 5000);
-
+        //сохранение дельты в sharedPreferences для быстрой повторной синхронизации
     }
 
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
-        // сообщение о запуске службы
-//        Toast.makeText(this, "Service started", Toast.LENGTH_SHORT).show();
-
-        // создаем объект нашего AsyncTask (необходимо для работы с сетью)
-
         return START_STICKY;
-    }
-
-    @Override
-    public void onDestroy() {
-        //сообщение об остановке службы
-        //Toast.makeText(this, "Service stoped", Toast.LENGTH_SHORT).show();
-
     }
 
     @Override
@@ -99,7 +86,8 @@ public class Sync extends Service {
                 stopService(new Intent(Sync.this, Sync.class));
                 return null;
             }
-            Log.e("Everything is fine: ", "Connected");
+            Log.d("Everything is fine: ", "Connected");
+            //успешное подключение к серверу
             DataInputStream input = null;
             DataOutputStream outputStream = null;
             try {
@@ -119,14 +107,15 @@ public class Sync extends Service {
                     int newD = (int) (t2 - (t1 + t3) / 2);
                     D = newD;
                     deltaT += (float) D / 10;
-                    if ((t1 / 1000) % 2 == 0) Log.d(SYNC, "delta is " + Long.toString((int) deltaT));
-                    Thread.sleep(400);
+                    //получение дельты времени
+                    if (t1 % 1000 == 0) Log.d(SYNC, "delta is " + (int) deltaT);
+                    Thread.sleep(150);
                 }
 
             } catch (Exception e) {
                 e.printStackTrace();
             } finally {
-                // close the connection
+                // закрытие соединенеия
                 try {
                     input.close();
                     socket.close();

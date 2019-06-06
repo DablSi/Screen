@@ -53,7 +53,7 @@ public class Video extends Activity implements TextureView.SurfaceTextureListene
     }
 
     //для полноэкранного режима
-    private void hideSystemUI() {
+    public void hideSystemUI() {
         View decorView = getWindow().getDecorView();
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
             decorView.setSystemUiVisibility(
