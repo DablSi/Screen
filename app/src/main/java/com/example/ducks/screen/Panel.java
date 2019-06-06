@@ -15,12 +15,14 @@ public class Panel extends Fragment {
     private TextView textView, textView1;
     private ImageButton button, button1;
 
+    //анимация выбора
     public void select(ImageButton button, TextView textView) {
         float scale = getResources().getDisplayMetrics().density;
         button.setPadding((int) (48 * scale + 0.5f), (int) (8 * scale + 0.5f), (int) (48 * scale + 0.5f), (int) (16 * scale + 0.5f));
         textView.setVisibility(View.VISIBLE);
     }
 
+    //анимация изменения выбора
     public void unselect(ImageButton button, TextView textView) {
         float scale = getResources().getDisplayMetrics().density;
         button.setPadding((int) (48 * scale + 0.5f), (int) (16 * scale + 0.5f), (int) (48 * scale + 0.5f), (int) (16 * scale + 0.5f));
@@ -30,10 +32,8 @@ public class Panel extends Fragment {
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        // менеджер компоновки, который позволяет получать доступ к layout с наших ресурсов
         View view = inflater.inflate(R.layout.fragment_panel, container, false);
 
-        // теперь можем получить наши элементы, расположенные во фрагменте
         textView = view.findViewById(R.id.add);
         button = view.findViewById(R.id.first);
         button1 = view.findViewById(R.id.second);
@@ -49,6 +49,7 @@ public class Panel extends Fragment {
                 }
             }
         });
+        //выбор главной активности
 
         button1.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -61,6 +62,7 @@ public class Panel extends Fragment {
                 }
             }
         });
+        //выбор активности поиска
 
         switch (getActivity().getClass().getSimpleName()) {
             case "MainActivity":

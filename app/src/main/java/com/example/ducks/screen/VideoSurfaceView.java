@@ -2,12 +2,11 @@ package com.example.ducks.screen;
 
 import android.content.Context;
 import android.graphics.*;
-import android.graphics.drawable.BitmapDrawable;
-import android.view.Display;
-import android.view.MotionEvent;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 
+//данный класс не используется и является запасным прототипом
+//на случай, если данной синхронизации видео будет недостаточно
 public class VideoSurfaceView extends SurfaceView implements SurfaceHolder.Callback {
 
     private DrawThread drawThread;

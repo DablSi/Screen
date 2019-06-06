@@ -8,6 +8,7 @@ import android.util.Log;
 
 public class Autorun extends BroadcastReceiver {
 
+    //Запуск сервиса Sync при перезагрузке телефона (для того, чтобы успеть синхронизировать)
     @Override
     public void onReceive(Context context, Intent arg1) {
         Intent intent = new Intent(context, Sync.class);

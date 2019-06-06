@@ -26,57 +26,48 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 
 public class Video extends Activity implements TextureView.SurfaceTextureListener {
-    // Log tag
+    // Log тэг
     private static final String TAG = Video.class.getName();
-    // Asset video file name
     private float mVideoWidth;
     private float mVideoHeight;
     private float mDisplayWidth;
     private float mDisplayHeight;
     static int ax, ay, bx, by;
-    // MediaPlayer instance to control playback of video file.
+    // MediaPlayer для проигрывания видео
     static MediaPlayer mMediaPlayer;
     private TextureView mTextureView;
     static String path;
-    private PowerManager.WakeLock wakeLock;
 
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.texture_video_crop);
-        PowerManager powerManager = (PowerManager)Video.this.getSystemService(Context.POWER_SERVICE);
-        wakeLock = powerManager.newWakeLock(PowerManager.FULL_WAKE_LOCK, "screen:logtag");
-        wakeLock.acquire();
         calculateVideoSize();
         ax = ax * ((int) mVideoWidth / 100);
         ay = ay * ((int) mVideoHeight / 100);
         bx = bx * ((int) mVideoWidth / 100);
         by = by * ((int) mVideoHeight / 100);
+        //перевод координат из процентов
         initView();
     }
 
+    //для полноэкранного режима
     private void hideSystemUI() {
-        // Enables regular immersive mode.
-        // For "lean back" mode, remove SYSTEM_UI_FLAG_IMMERSIVE.
-        // Or for "sticky immersive," replace it with SYSTEM_UI_FLAG_IMMERSIVE_STICKY
         View decorView = getWindow().getDecorView();
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
             decorView.setSystemUiVisibility(
                     View.SYSTEM_UI_FLAG_IMMERSIVE
-                            // Set the content to appear under the system bars so that the
-                            // content doesn't resize when the system bars hide and show.
                             | View.SYSTEM_UI_FLAG_LAYOUT_STABLE
                             | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
                             | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
-                            // Hide the nav bar and status bar
                             | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
                             | View.SYSTEM_UI_FLAG_FULLSCREEN);
         }
     }
 
-    // Shows the system bars by removing all the flags
-// except for the ones that make the content appear under the system bars.
+
+    //для неполноэкранного режима
     private void showSystemUI() {
         View decorView = getWindow().getDecorView();
         decorView.setSystemUiVisibility(
@@ -85,14 +76,12 @@ public class Video extends Activity implements TextureView.SurfaceTextureListene
                         | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN);
     }
 
+    //подготовка TextureView
     @SuppressLint("ClickableViewAccessibility")
     private void initView() {
         hideSystemUI();
+
         mTextureView = findViewById(R.id.textureView);
-        // SurfaceTexture is available only after the TextureView
-        // is attached to a window and onAttachedToWindow() has been invoked.
-        // We need to use SurfaceTextureListener to be notified when the SurfaceTexture
-        // becomes available.
         mTextureView.setSurfaceTextureListener(this);
         FrameLayout rootView = findViewById(R.id.rootView);
         Point size = new Point();
@@ -101,37 +90,20 @@ public class Video extends Activity implements TextureView.SurfaceTextureListene
         mDisplayHeight = size.y;
 
         updateTextureViewSize();
-
-        rootView.setOnTouchListener(new View.OnTouchListener() {
-            @Override
-            public boolean onTouch(View view, MotionEvent motionEvent) {
-                if (motionEvent.getAction() == MotionEvent.ACTION_UP) {
-                    if (Timer.isStarted) {
-                        if (mMediaPlayer.isPlaying()) {
-                            showSystemUI();
-                            mMediaPlayer.pause();
-                        } else {
-                            hideSystemUI();
-                            mMediaPlayer.start();
-                        }
-                    }
-                }
-                return true;
-            }
-        });
     }
 
     @Override
     protected void onDestroy() {
         super.onDestroy();
         if (mMediaPlayer != null) {
-            // Make sure we stop video and release resources when activity is destroyed.
+            // Освобождаем ресурсы
             mMediaPlayer.stop();
             mMediaPlayer.release();
             mMediaPlayer = null;
         }
     }
 
+    //получение размеров видеофайла
     private void calculateVideoSize() {
         try {
             FileDescriptor fd = new FileInputStream(path).getFD();
@@ -152,13 +124,13 @@ public class Video extends Activity implements TextureView.SurfaceTextureListene
     }
 
 
+    //обрезка видео путем изменения размеров TextureView
     private void updateTextureViewSize() {
         float scaleX = mDisplayWidth / mVideoWidth, scaleY = mDisplayHeight / mVideoHeight;
         float scale = mDisplayHeight / Math.abs(by - ay);
         Matrix matrix = new Matrix();
         matrix.reset();
         matrix.setScale(scale / scaleX, scale / scaleY);
-        //Без " / scaleX" результаты те же, что и с прошлым кодом
         matrix.postTranslate(-scale * ax, -scale * ay);
         mTextureView.setLayoutParams(new FrameLayout.LayoutParams((int) mDisplayWidth, (int) mDisplayHeight));
         mTextureView.setTransform(matrix);
@@ -174,7 +146,7 @@ public class Video extends Activity implements TextureView.SurfaceTextureListene
                 ActivityCompat.requestPermissions(this,
                         new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE, Manifest.permission.READ_EXTERNAL_STORAGE},
                         1);
-            }
+            } //получение разрешений
 
             mMediaPlayer = new MediaPlayer();
 
@@ -189,12 +161,13 @@ public class Video extends Activity implements TextureView.SurfaceTextureListene
             } catch (IOException e) {
                 e.printStackTrace();
             }
+            //загрузка видео
+
             mMediaPlayer.setSurface(surface);
             mMediaPlayer.setLooping(true);
 
-            // don't forget to call MediaPlayer.prepareAsync() method when you use constructor for
-            // creating MediaPlayer
             mMediaPlayer.prepareAsync();
+            //обязательно вызывается, если используешь конструктор для создания медиаплеера
 
         } catch (IllegalArgumentException e) {
             Log.d(TAG, e.getMessage());
@@ -202,31 +175,20 @@ public class Video extends Activity implements TextureView.SurfaceTextureListene
             Log.d(TAG, e.getMessage());
         } catch (IllegalStateException e) {
             e.printStackTrace();
+        } catch (Exception e){
+            e.printStackTrace();
         }
-    }
-
-    @Override
-    protected void onPause() {
-        super.onPause();
-        if(!wakeLock.isHeld())
-        wakeLock.release();
     }
 
     @Override
     public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
         if (requestCode == 1) {
-            if (grantResults.length == 2 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+            if (grantResults.length != 2 || grantResults[0] != PackageManager.PERMISSION_GRANTED) {
                 Toast.makeText(this,
-                        "permission_storage_success",
-                        Toast.LENGTH_SHORT).show();
-
-            } else {
-                Toast.makeText(this,
-                        "permission_storage_failure",
+                        "Доступ к файлам запрещен!\nРазрешите приложению читать файлы.",
                         Toast.LENGTH_SHORT).show();
                 super.onRequestPermissionsResult(requestCode, permissions, grantResults);
             }
-            return;
         }
     }
 

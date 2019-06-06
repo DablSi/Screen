@@ -34,8 +34,7 @@ import java.io.IOException;
 import static com.example.ducks.screen.Search.URL;
 
 public class MainActivity extends AppCompatActivity {
-
-    private static final int REQUEST_TAKE_GALLERY_VIDEO = 0, REQUEST_START_CAMERA_ACTIVITY = 1;
+    public static final int REQUEST_TAKE_GALLERY_VIDEO = 0, REQUEST_START_CAMERA_ACTIVITY = 1;
     public static byte[] video;
     public static int room = -1;
     private TextView textView1;
@@ -43,6 +42,7 @@ public class MainActivity extends AppCompatActivity {
     protected static String android_id;
     private Button button;
 
+    //открывает проводник для выбора файла
     private void showFileChooser() {
         if (PackageManager.PERMISSION_GRANTED != ActivityCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE)) {
             ActivityCompat.requestPermissions(this,
@@ -55,11 +55,11 @@ public class MainActivity extends AppCompatActivity {
         startActivityForResult(Intent.createChooser(intent, "Select Video"), REQUEST_TAKE_GALLERY_VIDEO);
     }
 
+    //открывает таймер, если фото было удачным
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         if (resultCode == RESULT_OK) {
             if (requestCode == REQUEST_TAKE_GALLERY_VIDEO) {
                 Uri selectedImageUri = data.getData();
-                // MEDIA GALLERY
                 String selectedImagePath = getPath(selectedImageUri);
                 if (selectedImagePath != null) {
                     Log.e("FILE", selectedImagePath);
@@ -69,7 +69,7 @@ public class MainActivity extends AppCompatActivity {
                 }
             }
         }
-        if (requestCode == REQUEST_START_CAMERA_ACTIVITY) {
+        if (requestCode == REQUEST_START_CAMERA_ACTIVITY && resultCode == REQUEST_START_CAMERA_ACTIVITY) {
             startActivity(new Intent(MainActivity.this, Timer.class));
         }
     }
@@ -86,22 +86,22 @@ public class MainActivity extends AppCompatActivity {
             Call<Integer> integerCall = service.getRoom();
             try {
                 Response<Integer> integerResponse = integerCall.execute();
-                room = integerResponse.body();
+                room = integerResponse.body(); //получение номера комнаты
                 Call<Void> call = service.putDevice(android_id, room, null);
-                call.execute();
+                call.execute(); //создание комнаты
                 runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
                         Toast.makeText(MainActivity.this, "Подождите, видео загружается", Toast.LENGTH_LONG).show();
                     }
                 });
-            } catch (IOException e) {
+            } catch (Exception e) {
                 e.printStackTrace();
             }
             File file = new File(Video.path);
             RequestBody requestBody = RequestBody.create(MediaType.parse("*/*"), file);
             MultipartBody.Part fileToUpload = MultipartBody.Part.createFormData("video", file.getName(), requestBody);
-
+            //загрузка видео на сервер
             service.uploadVideo(fileToUpload, room).enqueue(new Callback<Void>() {
 
                 @Override
@@ -131,6 +131,7 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+    //получение пути из URI
     private String getPath(Uri uri) {
         if ("content".equalsIgnoreCase(uri.getScheme())) {
             String[] projection = {MediaStore.Video.Media.DISPLAY_NAME};
@@ -141,7 +142,6 @@ public class MainActivity extends AppCompatActivity {
                 cursor.moveToFirst();
                 String index = cursor.getString(column_index);
                 cursor.close();
-                //!!!
                 String DownloadDirectory = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS).toString();
                 String file = DownloadDirectory + "/" + index;
                 return file;
@@ -186,7 +186,6 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onResume() {
         super.onResume();
-        //setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
         if (room != -1 && isUploaded)
             textView1.setText(getString(R.string.roomNum) + room);
     }
@@ -198,6 +197,7 @@ public class MainActivity extends AppCompatActivity {
             if (!Sync.isStarted)
                 startService(new Intent(MainActivity.this, Sync.class));
             startService(new Intent(MainActivity.this, Autorun.class));
+            //запуск сервисов
             return null;
         }
     }

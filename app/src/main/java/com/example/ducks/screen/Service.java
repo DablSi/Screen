@@ -15,33 +15,33 @@ public interface Service {
 
     //Добавить девайс
     @Multipart
-    @POST("/post")
+    @POST("/Server-0.0.1-SNAPSHOT/post")
     public Call<Void> putDevice(@Part("device") String device, @Part("room") Integer room, @Part("date") Long date);
 
     //Добавить координаты
     //Camera
     @Multipart
-    @POST("/post/coords")
+    @POST("/Server-0.0.1-SNAPSHOT/post/coords")
     public Call<Void> putCoords(@Part("room") int room, @Part("x1") int x1, @Part("y1") int y1, @Part("x2") int x2, @Part("y2") int y2, @Part("color") int[] color);
 
     //Получить координаты
     //Video
-    @GET("/get/coords/{device}")
+    @GET("/Server-0.0.1-SNAPSHOT/get/coords/{device}")
     public Call<Coords> getCoords(@Path("device") String device);
 
     //Получить время запуска
     //Search +
-    @GET("/get/{device}")
+    @GET("/Server-0.0.1-SNAPSHOT/get/{device}")
     public Call<Long> getTime(@Path("device") String device);
 
     //Получить цвет
     //Search +
-    @GET("/get/color/{device}")
+    @GET("/Server-0.0.1-SNAPSHOT/get/color/{device}")
     public Call<int[]> getColor(@Path("device") String device);
 
     //Получение номера комнаты
     //Camera +
-    @GET("/get/room")
+    @GET("/Server-0.0.1-SNAPSHOT/get/room")
     public Call<Integer> getRoom();
 
     @GET(value = "/download/{room}")
@@ -53,20 +53,20 @@ public interface Service {
     public Call<Void> uploadVideo(@Part MultipartBody.Part video, @Part("room") int room);
 
     //Получение массива цветов
-    @GET("/get/colors")
+    @GET("/Server-0.0.1-SNAPSHOT/get/colors")
     public Call<int[]> getColors();
 
     //Добавить время запуска видео
     @Multipart
-    @POST("/post/startVideo")
+    @POST("/Server-0.0.1-SNAPSHOT/post/startVideo")
     public Call<Void> putStartVideo(@Part("room") Integer room, @Part("date") Long date);
 
     //Получить время запуска видео
-    @GET("/get/startVideo/{device}")
+    @GET("/Server-0.0.1-SNAPSHOT/get/startVideo/{device}")
     public Call<Long> getStartVideo(@Path("device") String device);
 
     //Получение индексов цветов
-    @GET("/get/indexes/{room}")
+    @GET("/Server-0.0.1-SNAPSHOT/get/indexes/{room}")
     public Call<int[]> getIndexes(@Path("room") int room);
 
     //Данные каждого гаджета

@@ -31,18 +31,16 @@ import java.util.concurrent.ExecutionException;
 public class Search extends AppCompatActivity {
     RelativeLayout relativeLayout;
     boolean isClicked = false, isTrue = true;
-    public static String URL = "http://192.168.1.6:8080";
+    public static String URL = "https://cloud.itx.ru:444/Server-0.0.1-SNAPSHOT/";
     private String android_id;
     private int color1, color2;
     public static Integer room;
     private Response<ResponseBody> responseBody;
     private Fragment newFragment;
     private long timeStart = 0;
+    private PowerManager.WakeLock wakeLock;
 
     private void hideSystemUI() {
-        // Enables regular immersive mode.
-        // For "lean back" mode, remove SYSTEM_UI_FLAG_IMMERSIVE.
-        // Or for "sticky immersive," replace it with SYSTEM_UI_FLAG_IMMERSIVE_STICKY
         View decorView = getWindow().getDecorView();
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
             decorView.setSystemUiVisibility(
@@ -62,6 +60,10 @@ public class Search extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_search);
+
+        PowerManager powerManager = (PowerManager)Search.this.getSystemService(Context.POWER_SERVICE);
+        wakeLock = powerManager.newWakeLock(PowerManager.FULL_WAKE_LOCK, "screen:logtag");
+        wakeLock.acquire();
 
         EditText editText = findViewById(R.id.editText);
         relativeLayout = findViewById(R.id.ll);
