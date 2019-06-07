@@ -28,8 +28,7 @@ import java.util.*;
 
 import static com.example.ducks.screen.MainActivity.REQUEST_START_CAMERA_ACTIVITY;
 import static com.example.ducks.screen.MainActivity.android_id;
-import static com.example.ducks.screen.Search.URL;
-import static com.example.ducks.screen.Search.room;
+import static com.example.ducks.screen.Search.*;
 
 @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
 public class Camera extends AppCompatActivity {
@@ -361,6 +360,7 @@ public class Camera extends AppCompatActivity {
         public void run() {
             Retrofit retrofit = new Retrofit.Builder()
                     .baseUrl(URL)
+                    .client(getUnsafeOkHttpClient().build())
                     .addConverterFactory(GsonConverterFactory.create())
                     .build();
             Service service = retrofit.create(Service.class);
@@ -434,6 +434,7 @@ public class Camera extends AppCompatActivity {
 
             Retrofit retrofit = new Retrofit.Builder()
                     .baseUrl(URL)
+                    .client(getUnsafeOkHttpClient().build())
                     .addConverterFactory(GsonConverterFactory.create())
                     .build();
             Service service = retrofit.create(Service.class);

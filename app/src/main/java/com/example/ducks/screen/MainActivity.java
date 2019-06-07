@@ -29,9 +29,9 @@ import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
 
 import java.io.File;
-import java.io.IOException;
 
 import static com.example.ducks.screen.Search.URL;
+import static com.example.ducks.screen.Search.getUnsafeOkHttpClient;
 
 public class MainActivity extends AppCompatActivity {
     public static final int REQUEST_TAKE_GALLERY_VIDEO = 0, REQUEST_START_CAMERA_ACTIVITY = 1;
@@ -80,6 +80,7 @@ public class MainActivity extends AppCompatActivity {
         public void run() {
             Retrofit retrofit = new Retrofit.Builder()
                     .baseUrl(URL)
+                    .client(getUnsafeOkHttpClient().build())
                     .addConverterFactory(GsonConverterFactory.create())
                     .build();
             Service service = retrofit.create(Service.class);

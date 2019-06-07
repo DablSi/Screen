@@ -15,6 +15,7 @@ import java.util.Locale;
 
 import static com.example.ducks.screen.MainActivity.room;
 import static com.example.ducks.screen.Search.URL;
+import static com.example.ducks.screen.Search.getUnsafeOkHttpClient;
 
 
 public class Timer extends AppCompatActivity {
@@ -97,6 +98,7 @@ public class Timer extends AppCompatActivity {
             super.run();
             Retrofit retrofit = new Retrofit.Builder()
                     .baseUrl(URL)
+                    .client(getUnsafeOkHttpClient().build())
                     .addConverterFactory(GsonConverterFactory.create())
                     .build();
             Call<Void> call = retrofit.create(Service.class).putStartVideo(room, time);
