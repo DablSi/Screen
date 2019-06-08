@@ -36,6 +36,8 @@ public class Search extends AppCompatActivity {
     private Response<ResponseBody> responseBody;
     private long timeStart = 0;
     private PowerManager.WakeLock wakeLock;
+    private Retrofit retrofit;
+    private Service service;
 
     //для полноэкранного режима
     private void hideSystemUI() {
@@ -93,12 +95,12 @@ public class Search extends AppCompatActivity {
                     .setLenient()
                     .create();
 
-            Retrofit retrofit = new Retrofit.Builder()
+            retrofit = new Retrofit.Builder()
                     .baseUrl(URL)
                     .client(getUnsafeOkHttpClient().build())
                     .addConverterFactory(GsonConverterFactory.create(gson))
                     .build();
-            Service service = retrofit.create(Service.class);
+            service = retrofit.create(Service.class);
             Call<Void> call = service.putDevice(android_id, room, null);
             try {
                 call.execute();
@@ -109,24 +111,6 @@ public class Search extends AppCompatActivity {
             } catch (IOException e) {
                 e.printStackTrace();
             }
-
-            Call<int[]> call2 = service.getColor(android_id);
-            try {
-                Response<int[]> colorResponse = call2.execute();
-                color1 = colorResponse.body()[0];
-                color2 = colorResponse.body()[1];
-                //получение цветов
-                runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        relativeLayout.setBackgroundColor(color1);
-                    }
-                });
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-
-
         }
     }
 
@@ -135,21 +119,15 @@ public class Search extends AppCompatActivity {
 
         @Override
         public void run() {
-            Retrofit retrofit = new Retrofit.Builder()
-                    .baseUrl(URL)
-                    .client(getUnsafeOkHttpClient().build())
-                    .addConverterFactory(GsonConverterFactory.create())
-                    .build();
-            Service service = retrofit.create(Service.class);
             DownloadThread downloadThread = new DownloadThread();
             downloadThread.start();
-            while (time <= (System.currentTimeMillis() + 100)) {
+            while (time - (System.currentTimeMillis() + (int) Sync.deltaT) - 60 <= 0) {
                 Call<Long> call = service.getTime(android_id);
                 try {
                     Response<Long> userResponse = call.execute();
                     time = userResponse.body();
-                    //получение времени запуска видео
-                    if (time <= (System.currentTimeMillis() + 100))
+                    //получение времени изменения цвета
+                    if (time <= System.currentTimeMillis())
                         Thread.sleep(150);
                 } catch (Exception e) {
                     e.printStackTrace();
@@ -193,6 +171,7 @@ public class Search extends AppCompatActivity {
                             Response<Long> response = call.execute();
                             timeStart = response.body();
                             //получение времени начала видео
+                            if(timeStart < System.currentTimeMillis())
                             Thread.sleep(150);
                         }
                         runOnUiThread(new Runnable() {
@@ -205,7 +184,16 @@ public class Search extends AppCompatActivity {
                         timer.schedule(new TimerTask() {
                             @Override
                             public void run() {
-                                Video.mMediaPlayer.start();
+                                if (Video.mMediaPlayer != null)
+                                    Video.mMediaPlayer.start();
+                                else {
+                                    runOnUiThread(new Runnable() {
+                                        @Override
+                                        public void run() {
+                                            Toast.makeText(Search.this, "Видео НЕ получено", Toast.LENGTH_LONG).show();
+                                        }
+                                    });
+                                }
                                 //начало видео
                             }
                         }, timeStart - (System.currentTimeMillis() + (int) Sync.deltaT));
@@ -219,7 +207,7 @@ public class Search extends AppCompatActivity {
                         e.printStackTrace();
                     }
                 }
-            }, time - (System.currentTimeMillis() + (int) Sync.deltaT) - 80);
+            }, time - (System.currentTimeMillis() + (int) Sync.deltaT) - 70);
         }
     }
 
@@ -227,13 +215,6 @@ public class Search extends AppCompatActivity {
 
         @Override
         public void run() {
-            Retrofit retrofit = new Retrofit.Builder()
-                    .baseUrl(URL)
-                    .client(getUnsafeOkHttpClient().build())
-                    .addConverterFactory(GsonConverterFactory.create())
-                    .build();
-            Service service = retrofit.create(Service.class);
-
             Call<ResponseBody> call2 = service.getFile(room);
             call2.enqueue(new Callback<ResponseBody>() {
                 @Override
@@ -256,8 +237,23 @@ public class Search extends AppCompatActivity {
         @Override
         public void run() {
             try {
+                Call<int[]> call2 = service.getColor(android_id);
+                try {
+                    Response<int[]> colorResponse = call2.execute();
+                    color1 = colorResponse.body()[0];
+                    color2 = colorResponse.body()[1];
+                    //получение цветов
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            relativeLayout.setBackgroundColor(color1);
+                        }
+                    });
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
                 byte[] video = responseBody.body().bytes();
-                File storageDirectory = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_MOVIES);
+                File storageDirectory = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS);
                 File file = new File(storageDirectory, "Screen.mp4");
                 FileOutputStream fileOutputStream = new FileOutputStream(file);
                 fileOutputStream.write(video);

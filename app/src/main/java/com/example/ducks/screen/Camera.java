@@ -349,7 +349,7 @@ public class Camera extends AppCompatActivity {
                     bitmap2 = textureView.getBitmap();
                     new CordThread().start();
                 }
-            }, t - (System.currentTimeMillis() + (int) Sync.deltaT) + 50);
+            }, t - (System.currentTimeMillis() + (int) Sync.deltaT) + 60);
             //настоящее второе фото
         }
     }
