@@ -416,10 +416,10 @@ public class Camera extends AppCompatActivity {
             bitmap2 = Bitmap.createBitmap(bitmap2, 0, 0, bitmap2.getWidth(), bitmap2.getHeight(), matrix, true);
             //переворот фотографии в соответствии с ориентацией телефона
 
-            /*bitmapUpload(bitmap, 1);
+            bitmapUpload(bitmap, 1);
             bitmapUpload(bitmap2, 2);
 
-            bitmap = bitmapDownload(1);
+            /*bitmap = bitmapDownload(1);
             bitmap2 = bitmapDownload(2);
 
             !!!этот код используется только для тестирования!!!*/
@@ -688,9 +688,9 @@ public class Camera extends AppCompatActivity {
 
         if (R < 30 && G < 30 && B < 30) return Color.BLACK;
         if (R > 60 && G > 60 && B > 60) return Color.WHITE;
-        if (percentR > 60 && R > G + G * deviation && R > B + B * deviation) return Color.RED;
-        if (percentG > 60 && G > R + R * deviation && G > B + B * deviation) return Color.GREEN;
-        if (percentB > 70 && B > G + G * deviation && B > R + R * deviation) return Color.BLUE;
+        if (percentR > 50 && R > G + G * deviation && R > B + B * deviation) return Color.RED;
+        if (percentG > 50 && G > R + R * deviation && G > B + B * deviation) return Color.GREEN;
+        if (percentB > 50 && B > G + G * deviation && B > R + R * deviation) return Color.BLUE;
         // Цвет неизвестен
         return UNKNOWN;
     }
